@@ -1,0 +1,23 @@
+citHeader("To cite the R package 'bayespeak' in publications use:")
+
+citEntry(entry  = "article",
+         title  = "BayesPeak: Bayesian analysis of ChIP-seq data",
+         author = personList(
+                 person(first="Christiana", last="Spyrou"),
+                 person(first="Rory", last="Stark"),
+                 person(first="Andy", last="Lynch"),
+                 person(first="Simon", last="Tavar\\'{e}")
+			),
+	    journal = "BMC Bioinformatics",
+	    year = "2009",
+	    volume  = "10",
+	    number =  "299",
+
+		note = paste("R package version ", R.Version()$major, ".", R.Version()$minor, sep = ""),
+		textVersion = paste("Spyrou C, Stark R, Lynch AG, Tavar\\'{e} S",	"BayesPeak: Bayesian analysis of ChIP-seq data, BMC Bioinformatics 2009, 10:299 doi:10.1186/1471-2105-10-299")
+	)
+
+citFooter("This free open-source software implements academic
+research by the authors and co-workers. If you use it,
+please support the project by citing the appropriate
+journal articles.")

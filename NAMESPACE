@@ -1,0 +1,7 @@
+useDynLib(BayesPeak)
+
+import(IRanges)
+
+importFrom(graphics, hist)
+
+export(bayespeak, summarise.peaks, read.bed)
