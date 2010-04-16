@@ -135,9 +135,9 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 			if(!(length(end) %in% c(1, length(chr)))) {stop("stop length must be 1 or the same as chr")}
 		}
 	}
-	if(use.multicore && !require(multicore))
+	if(use.multicore && !("multicore" %in% names(sessionInfo()$otherPkgs)))
 	{
-		message("\nPackage 'multicore' is not available - parallel processing disabled. See ?bayespeak for more information.\n")
+		message("\nPackage 'multicore' is not loaded - parallel processing disabled. See ?bayespeak for more information.\n")
 		use.multicore = FALSE
 	}
 	
