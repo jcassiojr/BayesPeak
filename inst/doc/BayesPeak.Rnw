@@ -7,8 +7,12 @@
 %\VignettePackage{BayesPeak}
 \documentclass{article}
 
+\usepackage{amsmath}
+\usepackage[authoryear,round]{natbib}
 \usepackage{hyperref}
+\usepackage{cite}
 \usepackage{Sweave}
+
 \textwidth=6.2in
 \textheight=8.5in
 %\parskip=.3cm
@@ -28,6 +32,9 @@
 \newcommand{\classdef}[1]{
   {\em #1}
 }
+
+
+
 \begin{document}
 \title{\Rpackage{BayesPeak}: Bayesian Analysis of ChIP-seq data}
 
@@ -50,7 +57,7 @@ The Bayesian approach to parameter and state estimation returns posterior probab
 The other important feature of the algorithm is the use of the negative binomial distribution to model the counts of sequenced reads. This allows for overdispersion and provides a better fit to the data than the Poisson distribution that has been widely used by other methods. 
 
 \section{What is ChIP-seq?}
-Chromatin ImmunoPrecipitation (ChIP) is an experiment designed to study protein-DNA interactions, particularly to identify the genomic sites where proteins, such as transcription factors, bind to the DNA, or sites where histone modifications occur. The experiment produces samples that are enriched for the sites of interest compared to the rest of the genome. The use of this method combined with high-throughput sequencing of the samples is referred to as ChIP-seq. 
+Chromatin ImmunoPrecipitation (ChIP) is an experiment designed to study protein-DNA interactions, particularly to identify the genomic sites where proteins, such as transcription factors, bind to the DNA, or sites where histone modifications occur \citep{schmidt2009chip}. The experiment produces samples that are enriched for the sites of interest compared to the rest of the genome. The use of this method combined with high-throughput sequencing of the samples is referred to as ChIP-seq. 
 
 Given our protein of interest, the ChIP-seq protocol usually consists of the following steps. (The exact protocol may vary between different experiments, but \Rpackage{BayesPeak} will still be able to perform the peak-calling step.)
 	\begin{itemize}
@@ -388,12 +395,7 @@ output.sj2 <- summarise.peaks(raw.output, method = "lowerbound", exclude.jobs = 
 \label{cite}
 
 \begin{flushleft}
-If you use the \Rpackage{BayesPeak} algorithm then please cite:\newline
-
-
-Christiana Spyrou, Rory Stark, Andy Lynch and Simon Tavar\'{e} (2009). \emph{BayesPeak: Bayesian analysis of ChIP-seq data}, BMC Bioinformatics 2009, 10:299 doi:10.1186/1471-2105-10-299.
-
-
+If you use the \Rpackage{BayesPeak} algorithm, then please cite \citep{spyrou2009bayespeak}.
 
 \end{flushleft}
 
@@ -410,6 +412,8 @@ Christiana Spyrou, Rory Stark, Andy Lynch and Simon Tavar\'{e} (2009). \emph{Bay
 %sessionInfo()
 %@
 
+\section{Session Info}
+
 <<>>=
 sessionInfo()
 @
@@ -417,6 +421,9 @@ sessionInfo()
 \section{Acknowledgements}
 
 Many thanks to Dr. Duncan Odom's group for permission to use the H3K4me3 data set used in our examples, and to Dr. Jason Carroll's group for permission to use the data set shown in the \texttt{raw.output} data file.
+
+\bibliographystyle{amsplain}
+\bibliography{BayesPeak}
 
 \end{document}
 
