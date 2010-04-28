@@ -50,7 +50,7 @@
 
 \Rpackage{BayesPeak} is a Bioconductor package for the analysis of data sets from ChIP-seq experiments, particularly for identifying the genomic sites of protein--DNA interactions.
 
-The algorithm models the positions and orientations of the sequenced fragments and determines the locations of enriched areas, corresponding to binding sites and histone modifications, by using hidden Markov models and Bayesian statistical methodology.
+The algorithm models the positions and orientations of the sequenced fragments and determines the locations of enriched areas, corresponding to binding sites and histone modifications, by using a hidden Markov model and Bayesian statistical methodology.
 
 The Bayesian approach to parameter and state estimation returns posterior probabilities as measure of certainty, and offers great scope for interpretation, as well as allowing for the use of these probabilities as weights in subsequent analyses (e.g. motif discovery).
 
@@ -129,7 +129,7 @@ A hidden Markov model is fitted to the bins, thereby classifying them as enriche
 
 The output of the algorithm is the Posterior Probability (often abbreviated to \emph{PP}) of each bin being enriched. The \emph{PP} value is useful not only for calling the peaks, but could also be used in downstream analysis - for example, to weight observations when searching for a novel transcription factor motif. The \emph{PP} value is not to be confused with the \emph{p} value from hypothesis testing.
 
-For a full description of the model, please refer to the paper  in section \ref{cite}.
+For a full description of the model, please refer to the \citep{spyrou2009bayespeak}.
 
 \section{The \texttt{bayespeak()} function}
 
@@ -163,6 +163,7 @@ This feature requires the \Rpackage{multicore} package to be installed. At time 
 Having installed \Rpackage{multicore}, you can run the \texttt{bayespeak()} function in parallel by using the \mbox{\texttt{use.multicore = TRUE}} option. You can override the number of cores that multicore uses with the \texttt{mc.cores} argument.
 
 <<Help, eval=FALSE>>=
+library(multicore)
 raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed", use.multicore = TRUE, mc.cores = 4)
 output <- combine.peaks(raw.output, method = "lowerbound")
 @
@@ -305,7 +306,7 @@ This effect will be reflected in the parameters of the model, since the expected
 Jobs suffering from this problem tend to exhibit three properties:
 \begin{itemize}
 \item Unusually large number of $calls$.
-\item Low mean number of counts in an enriched bin, defined as $\lambda_1$ in the model description in the paper
+\item Low mean number of counts in an enriched bin, defined as $\lambda_1$ in the model description in \citep{spyrou2009bayespeak}.
 \item \emph{PP} values spread out over the interval [0,1] rather than mostly falling at 0 or 1, as explained in section \ref{PPthresh}. We quantify this using a score: of the bins with \emph{PP} values > 0.01, the score is the proportion that have \emph{PP} > 0.5. A low score is therefore indicative of overfitting.
 \end{itemize}
 
