@@ -406,13 +406,11 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 			}
 
 		} else {
+			##(into.jobs == FALSE)
 
-			output <- NULL
+			output <- list()
 
 			##Collect information on variance and autocorrelation
-			job.var <- 0.5*((var(tr$"+"$norm) + var(tr$"-"$norm)))
-			job.autocov <- apply(cbind(bin.start, bin.end), 1, function(x) {0.5*(autocov(tr$"+"$norm[x[1]:x[2]]) + autocov(tr$"-"$norm[x[1]:x[2]]))} )
-
 			job.var <- 0.5 * c( var(tr$"+"$norm) + var(tr$"-"$norm), var(tr$"+"$off) + var(tr$"-"$off))
 			job.autocov <- 0.5 * c( autocov(tr$"+"$norm) + autocov(tr$"-"$norm), autocov(tr$"+"$off) + autocov(tr$"-"$off))
 			job.autocorr <- job.autocov/job.var
@@ -475,7 +473,7 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 		peaks <- c(peaks, as.list(temp))
 	}
 
-	##peaks: add job label and names
+	##peaks: add job label and names (X)
 	for(i in 1:length(peaks)) ##TODO avoid for loop
 		{
 			if(nrow(peaks[[i]]) > 0)
