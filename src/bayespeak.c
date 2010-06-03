@@ -77,36 +77,6 @@ void say(char thing[])
 	#endif
 }
 
-SEXP appendreal(SEXP x, double y)
-{
-	int n = GET_LENGTH(x);
-	SET_LENGTH(x, n+1);
-	NUMERIC_POINTER(x)[n] = y;
-	return x;
-}
-
-SEXP appendint(SEXP x, int y)
-{
-	int n = GET_LENGTH(x);
-	SET_LENGTH(x, n+1);
-	INTEGER_POINTER(x)[n] = y;
-	return x;
-}
-
-/*.C function*/
-/*> system.time(woir <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed", start = 1E7, end = 1.6E7))*/
-/*Read 478547 records*/
-/*Chromosomes found:*/
-/*[1] "chr16"*/
-/*Read 221818 records*/
-/*Chromosomes found:*/
-/*[1] "chr16"*/
-
-/*Starting chr16:1e+07-1.6e+07:..Done.*/
-/*   user  system elapsed */
-/*300.660   0.130 300.793 */
-
-
 
 // ***********************************
 //		  Main algorithm
@@ -679,13 +649,27 @@ SEXP bayespeak(SEXP score2posR, SEXP score2negR, SEXP wR, SEXP w_dblR, SEXP w_ma
 		}
 	} //FIXME iters %% 10 != 0?
 
+	//how much memory do we need?
+	j = 0;
+	if(!abort)
+	{
+		for (i=0; i<N-2; i++)
+		{
+			if (probX[i]>(0.01*iters2))
+			{
+				j++;
+			}
+		}
+	}
+
 	//collect enriched regions into R vectors
 	SEXP outstart, outend, outPP;
 
-	PROTECT(outstart = NEW_INTEGER(0));
-	PROTECT(outend = NEW_INTEGER(0));
-	PROTECT(outPP = NEW_NUMERIC(0));
+	PROTECT(outstart = NEW_INTEGER(j));
+	PROTECT(outend = NEW_INTEGER(j));
+	PROTECT(outPP = NEW_NUMERIC(j));
 
+	j = 0;
 	if(!abort)
 	{
 		for (i=0; i<N-2; i++)
@@ -693,9 +677,10 @@ SEXP bayespeak(SEXP score2posR, SEXP score2negR, SEXP wR, SEXP w_dblR, SEXP w_ma
 			if (probX[i]>(0.01*iters2))
 			{
 				//chr?
-				outstart = appendint(outstart, *start+(i*(*win)));
-				outend = appendint(outend, *start+(i+1)*(*win));
-				outPP = appendreal(outPP, probX[i]/(iters2));
+				INTEGER_POINTER(outstart)[j] = *start+(i*(*win));
+				INTEGER_POINTER(outend)[j] = *start+(i+1)*(*win);
+				NUMERIC_POINTER(outPP)[j] = probX[i]/(iters2);
+				j++;
 			}
 		}
 	}

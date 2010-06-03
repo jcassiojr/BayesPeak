@@ -453,7 +453,7 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 		message("Done.")
 
 		##QC: collect parameters
-		temp <- cbind(t(sapply(output, function(x){c(x$jobstart, x$jobend, x$para)}))) ##FIXME error on this line (Shamith data set)
+		temp <- cbind(t(sapply(output, function(x){c(x$jobstart, x$jobend, x$para)})))
 
 		if(repeat.offset)
 		{
@@ -474,7 +474,7 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 	}
 
 	##peaks: add job label and names (X)
-	for(i in 1:length(peaks)) ##TODO avoid for loop
+	for(i in 1:length(peaks))
 		{
 			if(nrow(peaks[[i]]) > 0)
 			{
