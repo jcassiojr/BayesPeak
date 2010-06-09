@@ -119,7 +119,7 @@ bin.strand <- function(strand, chr, region = NULL, bin.size = 100L) ## bed is: $
 ##-----------------------------------
 ##bayespeak - main function
 
-bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100L, iterations = 10000L, repeat.offset = TRUE, into.jobs = TRUE, job.size = 6E6L, job.overlap = 20L, use.multicore = FALSE, mc.cores = getOption("cores"), prior = c(5, 5, 10, 5, 25, 4, 0.5, 5))
+bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100L, iterations = 10000L, repeat.offset = TRUE, into.jobs = TRUE, job.size = 6E6L, job.overlap = 20L, use.multicore = FALSE, mc.cores = getOption("cores"), prior = c(5, 5, 10, 5, 25, 4, 0.5, 5), report.p.samples = TRUE)
 {
 	if(missing(start)) {start <- NA}
 	if(missing(end)) {end <- NA}
@@ -137,7 +137,7 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 	}
 	if(use.multicore && !("multicore" %in% names(sessionInfo()$otherPkgs)))
 	{
-		message("\nPackage 'multicore' is not loaded - parallel processing disabled. See ?bayespeak for more information.\n")
+		message("\nPackage 'multicore' is not loaded - parallel processing disabled. Please load multicore with library(multicore). (See ?bayespeak for more information.)\n")
 		use.multicore = FALSE
 	}
 	
@@ -220,6 +220,7 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 	##prepare for data and QC info
 	QC <- data.frame()
 	peaks <- list()
+	p.samples <- list()
 
 	##collect start and end co-ordinates (TODO Take centromere into account)
 	jobs <- rep(0L, length(chr))
@@ -262,6 +263,7 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 
 	for(i in 1:length(chr))
 	{
+		output <- list()
 		ch <- chr[i]
 		##get region
 		region <- region.full[i,1:2]
@@ -408,8 +410,6 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 		} else {
 			##(into.jobs == FALSE)
 
-			output <- list()
-
 			##Collect information on variance and autocorrelation
 			job.var <- 0.5 * c( var(tr$"+"$norm) + var(tr$"-"$norm), var(tr$"+"$off) + var(tr$"-"$off))
 			job.autocov <- 0.5 * c( autocov(tr$"+"$norm) + autocov(tr$"-"$norm), autocov(tr$"+"$off) + autocov(tr$"-"$off))
@@ -471,6 +471,12 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 			}
 		)
 		peaks <- c(peaks, as.list(temp))
+
+		##p.samples: collect parameters passed across
+		if(report.p.samples)
+		{
+			p.samples <- c(p.samples, lapply(output, function(x) {cbind(p = x$p, theta = x$theta, a0 = x$a0, b0 = x$b0, lambda0 = x$lambda0, a1 = x$a1, b1 = x$b1, lambda1 = x$lambda1, loglhood = x$loglhood)}))
+		}
 	}
 
 	##peaks: add job label and names (X)
@@ -498,7 +504,7 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 	}
 
 	message("\n")
-	list(peaks = peaks, QC = QC, call = match.call())
+	list(peaks = peaks, QC = QC, p.samples = p.samples, call = match.call())
 }
 
 ##-----------------------------------

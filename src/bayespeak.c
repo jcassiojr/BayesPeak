@@ -77,6 +77,38 @@ void say(char thing[])
 	#endif
 }
 
+//don't use this function
+/*SEXP appendreal(SEXP x, double y)*/
+/*{*/
+/*	int n = GET_LENGTH(x);*/
+/*	SET_LENGTH(x, n+1);*/
+/*	NUMERIC_POINTER(x)[n] = y;*/
+/*	return x;*/
+/*}*/
+
+//don't use this function
+/*SEXP appendint(SEXP x, int y)*/
+/*{*/
+/*	int n = GET_LENGTH(x);*/
+/*	SET_LENGTH(x, n+1);*/
+/*	INTEGER_POINTER(x)[n] = y;*/
+/*	return x;*/
+/*}*/
+
+/*.C function*/
+/*> system.time(woir <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed", start = 1E7, end = 1.6E7))*/
+/*Read 478547 records*/
+/*Chromosomes found:*/
+/*[1] "chr16"*/
+/*Read 221818 records*/
+/*Chromosomes found:*/
+/*[1] "chr16"*/
+
+/*Starting chr16:1e+07-1.6e+07:..Done.*/
+/*   user  system elapsed */
+/*300.660   0.130 300.793 */
+
+
 
 // ***********************************
 //		  Main algorithm
@@ -136,7 +168,10 @@ SEXP bayespeak(SEXP score2posR, SEXP score2negR, SEXP wR, SEXP w_dblR, SEXP w_ma
 
   int iters = *iterations;
   double iters2 = (double)*iterations;
-  int burnin = ceil(iters/2);
+
+  //times related to MCMC convergence test, as per Geweke (1992)
+  int burnin = ceil(iters/2); //, na = ceil(iters*11/20), nstar = ceil(iters*3/4);
+
   int i, j, n, z, t, k1, k2;
   double  M1, M2, M3, M4, M, a, b;
   double u0, u1, u2, u3, u4, gamma, gammanew;
@@ -160,6 +195,19 @@ SEXP bayespeak(SEXP score2posR, SEXP score2negR, SEXP wR, SEXP w_dblR, SEXP w_ma
   Ba1 = prior[5]; //default: 4
   Ab1 = prior[6]; //default: 0.5
   Bb1 = prior[7]; //default: 5
+  //vectors for collection of para draws
+  SEXP pout, thetaout, a0out, b0out, lambda0out, a1out, b1out, lambda1out, gammaout, loglhoodout;
+
+  PROTECT(pout = NEW_NUMERIC(iters/20));
+  PROTECT(thetaout = NEW_NUMERIC(iters/20));
+  PROTECT(a0out = NEW_NUMERIC(iters/20));
+  PROTECT(b0out = NEW_NUMERIC(iters/20));
+  PROTECT(lambda0out = NEW_NUMERIC(iters/20));
+  PROTECT(a1out = NEW_NUMERIC(iters/20));
+  PROTECT(b1out = NEW_NUMERIC(iters/20));
+  PROTECT(lambda1out = NEW_NUMERIC(iters/20));
+  PROTECT(gammaout = NEW_NUMERIC(iters/20));
+  PROTECT(loglhoodout = NEW_NUMERIC(iters/20));
 
   double sd1, sd0, sd2;
   sd1 = 6.0;
@@ -614,7 +662,7 @@ SEXP bayespeak(SEXP score2posR, SEXP score2negR, SEXP wR, SEXP w_dblR, SEXP w_ma
 
 				say("L");
 
-				//store model parameters for use in QC - reduce to mean later FIXME
+				//store model parameters for use in QC - reduce to mean later
 				if(10*n + z > burnin)
 				{
 					para_out[0] += p;
@@ -626,6 +674,21 @@ SEXP bayespeak(SEXP score2posR, SEXP score2negR, SEXP wR, SEXP w_dblR, SEXP w_ma
 				}
 
 			}
+			//para list update
+			if(n >= burnin/10)
+			{
+				NUMERIC_POINTER(pout)[n - iters/20] = p;
+				NUMERIC_POINTER(thetaout)[n - iters/20] = theta;
+				NUMERIC_POINTER(a0out)[n - iters/20] = a0;
+				NUMERIC_POINTER(b0out)[n - iters/20] = b0;
+				NUMERIC_POINTER(lambda0out)[n - iters/20] = lambda0;
+				NUMERIC_POINTER(a1out)[n - iters/20] = a1;
+				NUMERIC_POINTER(b1out)[n - iters/20] = b1;
+				NUMERIC_POINTER(lambda1out)[n - iters/20] = lambda1;
+				NUMERIC_POINTER(gammaout)[n - iters/20] = gamma;
+				NUMERIC_POINTER(loglhoodout)[n - iters/20] = loglhood;
+			}
+
 			R_CheckUserInterrupt(); //respond to Ctrl-C termination
 		}
 
@@ -685,10 +748,11 @@ SEXP bayespeak(SEXP score2posR, SEXP score2negR, SEXP wR, SEXP w_dblR, SEXP w_ma
 		}
 	}
 
+
 	//put regions and parameters into an output object "out"
 	SEXP out, outnames;
 
-	PROTECT(outnames = allocVector(STRSXP, 7));
+	PROTECT(outnames = allocVector(STRSXP, 17));
 	SET_STRING_ELT(outnames,0,mkChar("chr"));
 	SET_STRING_ELT(outnames,1,mkChar("start"));
 	SET_STRING_ELT(outnames,2,mkChar("end"));
@@ -696,8 +760,18 @@ SEXP bayespeak(SEXP score2posR, SEXP score2negR, SEXP wR, SEXP w_dblR, SEXP w_ma
 	SET_STRING_ELT(outnames,4,mkChar("para"));
 	SET_STRING_ELT(outnames,5,mkChar("jobstart"));
 	SET_STRING_ELT(outnames,6,mkChar("jobend"));
+	SET_STRING_ELT(outnames,7,mkChar("p"));
+	SET_STRING_ELT(outnames,8,mkChar("theta"));
+	SET_STRING_ELT(outnames,9,mkChar("a0"));
+	SET_STRING_ELT(outnames,10,mkChar("b0"));
+	SET_STRING_ELT(outnames,11,mkChar("lambda0"));
+	SET_STRING_ELT(outnames,12,mkChar("a1"));
+	SET_STRING_ELT(outnames,13,mkChar("b1"));
+	SET_STRING_ELT(outnames,14,mkChar("lambda1"));
+	SET_STRING_ELT(outnames,15,mkChar("gamma"));
+	SET_STRING_ELT(outnames,16,mkChar("loglhood"));
 
-	PROTECT(out = allocVector(VECSXP, 7));
+	PROTECT(out = allocVector(VECSXP, 17));
 	SET_VECTOR_ELT(out, 0, chrR);
 	SET_VECTOR_ELT(out, 1, outstart);
 	SET_VECTOR_ELT(out, 2, outend);
@@ -705,11 +779,21 @@ SEXP bayespeak(SEXP score2posR, SEXP score2negR, SEXP wR, SEXP w_dblR, SEXP w_ma
 	SET_VECTOR_ELT(out, 4, para_outR);
 	SET_VECTOR_ELT(out, 5, startR);
 	SET_VECTOR_ELT(out, 6, endR);
+	SET_VECTOR_ELT(out, 7, pout);
+	SET_VECTOR_ELT(out, 8, thetaout);
+	SET_VECTOR_ELT(out, 9, a0out);
+	SET_VECTOR_ELT(out, 10, b0out);
+	SET_VECTOR_ELT(out, 11, lambda0out);
+	SET_VECTOR_ELT(out, 12, a1out);
+	SET_VECTOR_ELT(out, 13, b1out);
+	SET_VECTOR_ELT(out, 14, lambda1out);
+	SET_VECTOR_ELT(out, 15, gammaout);
+	SET_VECTOR_ELT(out, 16, loglhoodout);
 
 	setAttrib(out, R_NamesSymbol, outnames);
 
-	UNPROTECT(5);
-	//end R objects
+	UNPROTECT(15);
+	//end of R objects
 
 
   return(out);

@@ -12,7 +12,8 @@ bayespeak(treatment, control, chr = NULL, start,
 	repeat.offset = TRUE, into.jobs = TRUE, job.size = 6E6L,
 	job.overlap = 20L, use.multicore = FALSE,
 	mc.cores = getOption("cores"),
-	prior = c(5, 5, 10, 5, 25, 4, 0.5, 5))
+	prior = c(5, 5, 10, 5, 25, 4, 0.5, 5),
+	report.p.samples = TRUE)
 }
 
 
@@ -78,29 +79,38 @@ bayespeak(treatment, control, chr = NULL, start,
 	\item{prior}{
 		Numeric. A vector, specifying the prior on the hyperparameters as follows. We have lambda_0 ~ gamma(alpha_0, beta_0) and lambda_1 ~ gamma(alpha_1, beta_1). Additionally, we have that alpha_0, alpha_1, beta_0, beta_1 all have gamma priors. This argument should be c(alpha_0 shape, alpha_0 scale, beta_0 shape, beta_1 scale, alpha_1 shape, alpha_1 scale, beta_1 shape, beta_1 scale).
 	}
+
+	\item{report.p.samples}{
+		Logical. If FALSE, do not collect information required for the parameter samples reported in the output. Thus, output\$p.samples will be an empty list. If this information is not required, setting this parameter to FALSE will reduce memory usage.
+	}
 }
 
 
 \value{
 
-	A list of 3 objects:
+	A list of 4 objects:
 
-	- peaks: A \code{data.frame} corresponding to the bins that BayesPeak has identified as potentially being enriched. \code{chr, start, end} give the genomic co-ordinates of the bin. \code{PP} refers to the posterior probability of the bin being enriched. \code{job} is the number of the job within which the bin was called, which corresponds to a row in the QC data.frame (see below).
-
-	- QC: details of each individual job, listed in columns as follows:
 	\itemize{
-		\item \code{calls} is the number of potentially enriched bins identified in a job (i.e. bins with \code{PP} > 0.01).
-		\item \code{score} is simply the proportion of potentially enriched bins with a PP value above 0.5. Intuitively, a larger score is "better", as it indicates that more of the PP values have tended to 0 or 1.
-		\item \code{chr, start, end} are the genomic co-ordinates of the job.
-		\item We report the average value, across iterations of the algorithm, of the important parameters \code{p, theta, lambda0, lambda1, gamma} and the average log likelihood \code{loglhood}.
-		\item \code{var} is the variance of the bin counts.
-		\item \code{autocorr} is an estimate of the first order autocorrelation of bin counts.
-		\item \code{status} indicates whether the job was normal, or offset by half a bin width.
+		\item peaks: A \code{data.frame} corresponding to the bins that BayesPeak has identified as potentially being enriched. \code{chr, start, end} give the genomic co-ordinates of the bin. \code{PP} refers to the posterior probability of the bin being enriched. \code{job} is the number of the job within which the bin was called, which corresponds to a row in the QC data.frame (see below).
+
+		\item QC: details of each individual job, listed in columns as follows:
+			\itemize{
+				\item \code{calls} is the number of potentially enriched bins identified in a job (i.e. bins with \code{PP} > 0.01).
+				\item \code{score} is simply the proportion of potentially enriched bins with a PP value above 0.5. Intuitively, a larger score is "better", as it indicates that more of the PP values have tended to 0 or 1.
+				\item \code{chr, start, end} are the genomic co-ordinates of the job.
+				\item We report the average value, across iterations of the algorithm, of the important parameters \code{p, theta, lambda0, lambda1, gamma} and the average log likelihood \code{loglhood}.
+				\item \code{var} is the variance of the bin counts.
+				\item \code{autocorr} is an estimate of the first order autocorrelation of bin counts.
+				\item \code{status} indicates whether the job was normal, or offset by half a bin width.
+			}
+
+		\item call: the line of code used to run BayesPeak.
+
+		\item p.samples: A \code{list} of \code{matrix} objects, each containing parameter samples from the MCMC runs. \code{p.samples[[i]]} corresponds to the samples taken in job \code{i}. Samples are taken every 10 iterations, with the first half of the run being discarded, and to avoid using too much memory, not all parameters are given. This output can be used to assess convergence e.g. using the CRAN packages coda or boa. (see the vignette - \code{vignette("BayesPeak")})
 	}
 
-	- call: the line of code used to run BayesPeak.
+		Note that the raw output of this function is not intended to be used directly as results - the output should be summarised using the \code{\link{summarise.peaks}} function before using it in later analysis.
 
-	Note that the raw output of this function is not intended to be used directly as results - the output should be summarised using the \code{\link{summarise.peaks}} function before using it in later analysis.
 }
 
 

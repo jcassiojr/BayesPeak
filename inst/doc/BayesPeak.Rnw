@@ -42,9 +42,7 @@
 
 \maketitle
 
-%\textbf{Warning}: This is an early version of BayesPeak and is still in development, if you encounter any problems please send an email to 
-%\textit{jonathan.cairns@cancer.org.uk}. Please read section 6 to avoid the overfitting effect that may negatively impact your analysis. 
-
+\tableofcontents
 
 \section*{Introduction}
 
@@ -129,7 +127,7 @@ A hidden Markov model is fitted to the bins, thereby classifying them as enriche
 
 The output of the algorithm is the Posterior Probability (often abbreviated to \emph{PP}) of each bin being enriched. The \emph{PP} value is useful not only for calling the peaks, but could also be used in downstream analysis - for example, to weight observations when searching for a novel transcription factor motif. The \emph{PP} value is not to be confused with the \emph{p} value from hypothesis testing.
 
-For a full description of the model, please refer to the \citep{spyrou2009bayespeak}.
+For a full description of the model, please refer to \citep{spyrou2009bayespeak}.
 
 \section{The \texttt{bayespeak()} function}
 
@@ -145,12 +143,13 @@ down the chromosome into ``jobs", which by default are of length 6 Mb, and run t
 Within each job, read abundance is modelled using non-overlapping bins. To avoid missing any peaks that straddle a boundary between two bins, we run the algorithm a second time. This second job is described as ``offset" and shifts the boundaries of the bins by half a bin's length.
 
 
-The output of this function is a list of three things:
+The output of this function is a list of four things:
 
 \begin{itemize}
 \item \texttt{raw.output\$peaks}: Locations of ``potentially enriched" bins, with their associated posterior probabilities. (A ``potentially enriched" bin is defined as any bin with \emph{PP} > 0.01.) Note that this is output is preliminary and does not correspond to the final result of the analysis.
 \item \texttt{raw.output\$QC}: Information about the individual jobs.
 \item \texttt{raw.output\$call}: A record of the arguments used when the function was called.
+\item \texttt{raw.output\$p.samples}: A list of parameter samples from the MCMC runs. This output can be used to assess convergence e.g. by applying the Geweke test through the CRAN packages \Rpackage{coda} or \Rpackage{boa}. See section \ref{convergence} for more details.
 \end{itemize}
 
 \subsection{Parallelising \Rpackage{BayesPeak} - use of the multicore package}
@@ -200,9 +199,9 @@ data(raw.output)
 raw.output$call
 @
 
-(Note that although \texttt{raw.output} was generated from running \texttt{bayespeak()} with the above arguments, \texttt{raw.output\$peaks} has been manually reduced to only contain the data from chr16 to save space.)
+(Note that although \texttt{raw.output} was generated from running \texttt{bayespeak()} with the above arguments, \texttt{raw.output\$peaks} has been manually reduced to only contain the data from chr16 to save space. \texttt{raw.output\$p.samples} has also been removed, for the same reason.)
 
->From this object, extract the \emph{PP} values for each job with the following:
+From this object, extract the \emph{PP} values for each job with the following:
 
 <<PP3, fig = FALSE>>=
 PP <- split(raw.output$peaks$PP, raw.output$peaks$job)
@@ -230,7 +229,7 @@ for(i in 1:length(PP)) hist(PP[[i]], breaks =150, main = names(PP)[i])
 
 Examining the plots, they appear to have two distinct behaviours, as explained below.
 
-\subsubsection{High density of reads}
+\subsubsection*{High density of reads}
 For example, consider the \emph{PP} profile of job 324:
 
 <<job324, include=FALSE>>=
@@ -253,7 +252,7 @@ The plot is given in figure \ref{fig:job324}
 
 For data with a high density of reads, peaks are clearer and thus the \emph{PP} values of bins converge to 0 or 1, as observed in the figure above. So, the default \emph{PP} threshold value of 0.5 will suffice to distinguish between enrichment and unenrichment. This is the expected outcome from jobs that include enriched peaks.
 
-\subsubsection{Low density of reads}
+\subsubsection*{Low density of reads}
 On the other hand, as expected before, some jobs fall in areas of low enrichment and this affects their results. We demonstrate this by considering the \emph{PP} values across job 325:
 
 <<job325, include = FALSE>>=
@@ -277,6 +276,24 @@ When the coverage is sparse and therefore less information is available, the \em
 
 In these jobs even the bins with highest \emph{PP} cannot be classified as enriched since they are likely to correspond to random noise and, instead of choosing a high \emph{PP} threshold, the whole job should be considered as unenriched.
 
+
+\section{Assessing convergence}
+\label{convergence}
+
+We can assess the convergence of the MCMC chains by examining the parameter samples obtained. The output of the parameter samples from job $i$ is given in \texttt{raw.output\$p.samples[[i]]}, with half of the data discarded as burn-in and samples taken every 10 iterations. This data can be imported into MCMC packages, such as the CRAN packages \Rpackage{coda} and \Rpackage{boa}, allowing use of their inbuilt convergence assessment functions.
+
+For example, we can assess the convergence of job 316 with \Rpackage{coda}, using the Geweke diagnostic, with the following code. This code requires that \Rpackage{coda} has been installed from CRAN.
+
+<<coda, eval = FALSE>>=
+data(raw.output)
+library(coda)
+mcmc.job1 <- mcmc(raw.output$p.samples[[316]], thin = 10)
+geweke.diag(mcmc.job1)
+@
+
+More information on the interpretation of this diagnostic can be found in the individual packages' help files, and in \citep{Geweke1992}.
+
+If convergence is deemed unsatisfactory, this may be solved by increasing the \texttt{iterations} parameter in the \texttt{bayespeak()} function.
 
 \section{Overfitting}
 \label{overfitting}
