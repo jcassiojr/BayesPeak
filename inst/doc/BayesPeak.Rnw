@@ -164,7 +164,7 @@ Having installed \Rpackage{multicore}, you can run the \texttt{bayespeak()} func
 <<Help, eval=FALSE>>=
 library(multicore)
 raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed", use.multicore = TRUE, mc.cores = 4)
-output <- combine.peaks(raw.output, method = "lowerbound")
+output <- summarise.peaks(raw.output, method = "lowerbound")
 @
 
 
