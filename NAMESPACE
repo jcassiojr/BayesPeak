@@ -4,4 +4,4 @@ import(IRanges)
 
 importFrom(graphics, hist)
 
-export(bayespeak, summarise.peaks, read.bed)
+export(bayespeak, summarise.peaks, read.bed, plot.overfitdiag, identify.overfitdiag, region.overfitdiag, plot.bed, plot.job, plot.PP)

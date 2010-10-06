@@ -529,6 +529,9 @@ summarise.peaks <- function(x, threshold = 0.5, method = c("lowerbound", "max"),
 	##remove excluded jobs from peak list
 	x$peaks <- x$peaks[!(x$peaks$job %in% exclude.jobs),]
 
+	##vector for unenriched chromosomes
+	unenriched.chr <- character(0)
+
 	for(j in 1:length(chr))
 	{
 		##get peaks on this chr
@@ -563,7 +566,8 @@ summarise.peaks <- function(x, threshold = 0.5, method = c("lowerbound", "max"),
 		##exit if chromosome has been reduced to no reads
 		if(nrow(x.sel) == 0)
 		{
-			warning("No enrichment found on ", ch, " at PP > ", threshold)
+			#warning("No enrichment found on ", ch, " at PP > ", threshold)
+			unenriched.chr <- c(unenriched.chr, as.character(ch))
 			next
 		}
 
@@ -609,6 +613,8 @@ summarise.peaks <- function(x, threshold = 0.5, method = c("lowerbound", "max"),
 		temp <- data.frame(chr = ch, start = boundaries$start, end = boundaries$end, PP = p)
 		output <- rbind(output, temp) ##append
 	}
+
+	if(length(unenriched.chr) > 0) {warning("No enrichment found on at PP > ", threshold , " on the following chromosomes: ", paste(unenriched.chr, collapse = ", "))}
 
 	##output
 	if(is.null(output)) {return(NULL)}

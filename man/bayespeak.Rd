@@ -45,7 +45,7 @@ bayespeak(treatment, control, chr = NULL, start,
 	}
 
 	\item{bin.size}{
-		Numeric. Reads are collected into bins. This parameter controls the width of each bin.
+		Numeric. Reads are collected into bins. This parameter controls the width of each bin. The bin size is related to the mean fragment length in the library being sequenced, and thus a smaller mean fragment may merit a smaller bin size - please see Spyrou et al. (2009) for more information.
 	}
 
 	\item{iterations}{
