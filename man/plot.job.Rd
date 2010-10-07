@@ -9,7 +9,7 @@
 \usage{
 plot.job(x, raw.out, job, strand = "+", threshold = 0.5,
 	xlim = c(0,1), highlight = TRUE, col.un = "grey",
-	col.enr = "blue", bin = 50L, ...)
+	col.enr = "blue", bin = 100L, ...)
 }
 
 

@@ -71,7 +71,7 @@ Subsequently, the sample undergoes ``high-throughput sequencing" during which th
 
 Usually this process is repeated omitting the immunoprecipitation step to produce a sample with no preferential enrichment. This control sample has the same characteristics as ChIP-seq data and its inclusion is important to identify experimental biases. 
 
-There are many sources of error - for example, misalignment, impurities, or DNA which simply has a high affinity for being sequenced - which can result in noise across the genome, or even false peaks. The \Rpackage{BayesPeak} model is designed to separate the peaks from the noise, and to avoid calling false peaks.
+There are many sources of error - for example, misalignment, impurities, or DNA that simply has a high affinity for being sequenced - which can result in noise across the genome, or even false peaks. The \Rpackage{BayesPeak} model is designed to separate the peaks from the noise, and to avoid calling false peaks.
 
 \section{Simple workflow}
 \label{workflow}
@@ -95,7 +95,7 @@ output <- summarise.peaks(raw.output, method = "lowerbound")
 \begin{itemize}
 \item \texttt{bayespeak()} runs the actual BayesPeak algorithm on the data. The two input files are bed files located in the working directory, with H3K4me3 being the IP-treated data set and Input ID being the control data. In each case, we could have provided a data.frame or a RangedData object (from the IRanges package) instead of a file path.
 
-In a valid bed file, each row of the file to contains information for a read. In particular, the chromosome, start position, end position and DNA strand appear in the 1st, 2nd, 3rd and 6th columns respectively.
+In a valid bed file, each row of the file contains information for a single read. In particular, the chromosome, start position, end position and DNA strand appear in the 1st, 2nd, 3rd and 6th columns respectively.
 
 The function applies the algorithm to 6 Mb partitions of the genome (or ``jobs") by default, as explained in section \ref{algorithm}.
 \item \texttt{raw.output} is a list - it contains not only the bins called, but also some useful QC information (such as the model fit - in particular, this can be used to spot unreliable jobs as described in section \ref{overfitting}). This output needs to be summarised.
@@ -159,11 +159,12 @@ Due to its computational intensity, \Rpackage{BayesPeak} can be slow. However, t
 
 This feature requires the \Rpackage{multicore} package to be installed. At time of writing, it can be downloaded from \texttt{http://www.rforge.net/multicore/}.
 
-Having installed \Rpackage{multicore}, you can run the \texttt{bayespeak()} function in parallel by using the \mbox{\texttt{use.multicore = TRUE}} option. You can override the number of cores that multicore uses with the \texttt{mc.cores} argument.
+\begin{sloppypar}Having installed \Rpackage{multicore}, you can run the \texttt{bayespeak()} function in parallel by using the \texttt{use.multicore = TRUE} option. You can override the number of cores that multicore uses with the \texttt{mc.cores} argument.\end{sloppypar}
 
 <<Help, eval=FALSE>>=
 library(multicore)
-raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed", use.multicore = TRUE, mc.cores = 4)
+raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed",
+	use.multicore = TRUE, mc.cores = 4)
 output <- summarise.peaks(raw.output, method = "lowerbound")
 @
 
@@ -199,42 +200,58 @@ data(raw.output)
 raw.output$call
 @
 
-(Note that although \texttt{raw.output} was generated from running \texttt{bayespeak()} with the above arguments, \texttt{raw.output\$peaks} has been manually reduced to only contain the data from chr16 to save space. \texttt{raw.output\$p.samples} has also been removed, for the same reason.)
+(Note that although \texttt{raw.output} was generated from running \texttt{bayespeak()} with the above arguments, \texttt{raw.output\$peaks} has been manually reduced to only contain the data from chr16 to save space. \texttt{raw.output\$p.samples} has also been reduced, for the same reason.)
 
-From this object, extract the \emph{PP} values for each job with the following:
+%From this object, extract the \emph{PP} values for each job with the following:
 
-<<PP3, fig = FALSE>>=
-PP <- split(raw.output$peaks$PP, raw.output$peaks$job)
-@
+%<<PP3, fig = FALSE>>=
+%PP <- split(raw.output$peaks$PP, raw.output$peaks$job)
+%@
 
-Recall that any bin with \emph{PP} < 0.01 was removed during the initial analysis. Therefore, to show the full range of the \emph{PP} values, we assume that all of the missing bins have \emph{PP} = 0 and reinstate them:
+%Recall that any bin with \emph{PP} < 0.01 was removed during the initial analysis. Therefore, to show the full range of the \emph{PP} values, we assume that all of the missing bins have \emph{PP} = 0 and reinstate them:
+
+%<<PP3a, fig = FALSE>>==
+%bin.width <- raw.output$peaks$end[1] - raw.output$peaks$start[1]
+%job.bins <- (raw.output$QC$end - raw.output$QC$start)/bin.width
+%job.bins <- job.bins[as.integer(names(PP))]
+
+%for(i in 1:length(PP))
+%{
+%	PP[[i]] <- c(PP[[i]], rep(0, job.bins[i] - length(PP[[i]])))
+%}
+%@
+
+%We can view each job in turn as follows:
+
+%<<PP3a, fig = FALSE>>==
+%par(mfrow = c(2,2), ask = TRUE)
+%for(i in 1:length(PP)) hist(PP[[i]], breaks =150, main = names(PP)[i])
+%@
+
+We can view the PP values generated from each job as follows:
 
 <<PP3a, fig = FALSE>>==
-bin.width <- raw.output$peaks$end[1] - raw.output$peaks$start[1]
-job.bins <- (raw.output$QC$end - raw.output$QC$start)/bin.width
-job.bins <- job.bins[as.integer(names(PP))]
+min.job <- min(raw.output$peaks$job)
+max.job <- max(raw.output$peaks$job)
 
-for(i in 1:length(PP))
-{
-	PP[[i]] <- c(PP[[i]], rep(0, job.bins[i] - length(PP[[i]])))
-}
-@
-
-We can view each job in turn as follows:
-
-<<PP3a, fig = FALSE>>==
 par(mfrow = c(2,2), ask = TRUE)
-for(i in 1:length(PP)) hist(PP[[i]], breaks =150, main = names(PP)[i])
+for(i in min.job:max.job) {plot.PP(raw.output, job = i, ylim = c(0,50))}
 @
+
+(We will not wish to do this in most large data sets, as the number of jobs will be prohibitively large, making it impractical to look at each plot in turn.)
 
 Examining the plots, they appear to have two distinct behaviours, as explained below.
 
 \subsubsection*{High density of reads}
 For example, consider the \emph{PP} profile of job 324:
 
+%<<job324, include=FALSE>>=
+%i <- 9
+%hist(PP[[i]], breaks =150, main = names(PP)[i], ylim= c(0,50))
+%@
 <<job324, include=FALSE>>=
-i <- 9
-hist(PP[[i]], breaks =150, main = names(PP)[i], ylim= c(0,50))
+i <- 324
+plot.PP(raw.output, job = i, ylim = c(0,50))
 @
 
 The plot is given in figure \ref{fig:job324}
@@ -255,9 +272,13 @@ For data with a high density of reads, peaks are clearer and thus the \emph{PP} 
 \subsubsection*{Low density of reads}
 On the other hand, as expected before, some jobs fall in areas of low enrichment and this affects their results. We demonstrate this by considering the \emph{PP} values across job 325:
 
+%<<job325, include = FALSE>>=
+%i <- 10
+%hist(PP[[i]], breaks =150, main = names(PP)[i], ylim= c(0,50))
+%@
 <<job325, include = FALSE>>=
-i <- 10
-hist(PP[[i]], breaks =150, main = names(PP)[i], ylim= c(0,50))
+i <- 325
+plot.PP(raw.output, job = i, ylim = c(0,50))
 @
 
 The plot is given in figure \ref{fig:job325}.
@@ -277,24 +298,6 @@ When the coverage is sparse and therefore less information is available, the \em
 In these jobs even the bins with highest \emph{PP} cannot be classified as enriched since they are likely to correspond to random noise and, instead of choosing a high \emph{PP} threshold, the whole job should be considered as unenriched.
 
 
-\section{Assessing convergence}
-\label{convergence}
-
-We can assess the convergence of the MCMC chains by examining the parameter samples obtained. The output of the parameter samples from job $i$ is given in \texttt{raw.output\$p.samples[[i]]}, with half of the data discarded as burn-in and samples taken every 10 iterations. This data can be imported into MCMC packages, such as the CRAN packages \Rpackage{coda} and \Rpackage{boa}, allowing use of their inbuilt convergence assessment functions.
-
-For example, we can assess the convergence of job 316 with \Rpackage{coda}, using the Geweke diagnostic, with the following code. This code requires that \Rpackage{coda} has been installed from CRAN.
-
-<<coda, eval = FALSE>>=
-data(raw.output)
-library(coda)
-mcmc.job1 <- mcmc(raw.output$p.samples[[316]], thin = 10)
-geweke.diag(mcmc.job1)
-@
-
-More information on the interpretation of this diagnostic can be found in the individual packages' help files, and in \citep{Geweke1992}.
-
-If convergence is deemed unsatisfactory, this may be solved by increasing the \texttt{iterations} parameter in the \texttt{bayespeak()} function.
-
 \section{Overfitting}
 \label{overfitting}
 
@@ -313,7 +316,7 @@ The model assumes that there are both unenriched and enriched regions present. W
   \begin{center}
     \includegraphics{OF.png}
   \end{center}
-  \caption{An example of overfitting. In each of these histograms, only reads on the positive strand are shown for clarity. A blue bar indicates that \Rpackage{BayesPeak} has called that bin as containing a peak at \emph{PP} > 0.5. On the left, BayesPeak uses the enriched and unenriched states to explain the variance present in the background. On the right, the algorithm correctly identifies the large peaks present in the region of interest. (Notice the difference in scale between the two plots.)}
+  \caption{An example of overfitting. In each of these histograms, only reads on the positive strand are shown for clarity. A blue bar indicates that \Rpackage{BayesPeak} has called that bin as containing a peak at \emph{PP} > 0.5. On the left, BayesPeak uses the enriched and unenriched states to explain the variance present in the background. On the right, the algorithm correctly identifies the large peaks present in the region of interest. (Notice the difference in scale between the two plots.) These plots were produced with the \texttt{plot.job()} function.}
 \label{fig:OF}
 \end{figure}
 
@@ -327,19 +330,27 @@ Jobs suffering from this problem tend to exhibit three properties:
 \item \emph{PP} values spread out over the interval [0,1] rather than mostly falling at 0 or 1, as explained in section \ref{PPthresh}. We quantify this using a score: of the bins with \emph{PP} values > 0.01, the score is the proportion that have \emph{PP} > 0.5. A low score is therefore indicative of overfitting.
 \end{itemize}
 
-We can observe when overfitting has occured in our data set by plotting these properties against each other. We generate the plots with this code:
+We can observe when overfitting has occured in our data set by plotting these properties against each other. We generate two such plots with this code:
 
+%<<OF3, include = FALSE>>=
+%plot(log(raw.output$QC$calls), log(raw.output$QC$lambda1),
+%	main = "Job parameters - enriched bin counts against calls")
+%@
+%<<OF3b, include = FALSE>>=
+%plot(log(raw.output$QC$calls), log(raw.output$QC$score),
+%	main = "Job parameters - score against calls")
+%@
 <<OF3, include = FALSE>>=
-plot(log(raw.output$QC$calls), log(raw.output$QC$lambda1),
-	main = "Job parameters - enriched bin counts against calls")
+
+plot.overfitdiag(raw.output, whatX = "calls", whatY = "lambda1",
+	logX = TRUE, logY = TRUE)
 @
 <<OF3b, include = FALSE>>=
-plot(log(raw.output$QC$calls), log(raw.output$QC$score),
-	main = "Job parameters - score against calls")
+plot.overfitdiag(raw.output, whatX = "calls", whatY = "score",
+	logX = TRUE, logY = TRUE)
 @
 
-The plots generated are given in figures \ref{fig:OF3} and \ref{fig:OF3b}. Two clusters are visible in each, one of which is a cluster of jobs suffering from overfitting.
-
+The plots generated are given in figures \ref{fig:OF3} and \ref{fig:OF3b}. Two clusters are visible in each, one of which is a cluster of jobs suffering from overfitting. 
 
 
 \begin{figure}
@@ -364,22 +375,73 @@ The plots generated are given in figures \ref{fig:OF3} and \ref{fig:OF3b}. Two c
 
 
 
+It is worth trying different arguments to this function to find the plot in which the overfit clusters are most clearly defined - e.g. 
+
+<<OF3, include = FALSE>>=
+plot.overfitdiag(raw.output, whatX = "calls", whatY = "score",
+	logX = TRUE, logY = FALSE)
+@
+
+or
+
+<<OF3b, include = FALSE>>=
+plot.overfitdiag(raw.output, whatX = "lambda1", whatY = "score",
+	logX = TRUE, logY = TRUE)
+@
+
+(These figures are not shown in this vignette.)
+
+
+
 Some jobs are expected to show no enrichment throughout, such as the centromere, and the location of these regions can be taken into account at a later version of the algorithm. At the moment, our approach is to apply BayesPeak to the whole genome and subsequently to filter out peaks that are allocated within regions of no enrichment.
 
 \subsection{Excluding calls from unenriched jobs}
-We can choose to simply remove all calls from particular jobs. For example, having looked at figure \ref{fig:OF3}, we can specify the overfit cluster by removing all jobs with low counts in their enriched bins - for example, $\log(\lambda_1) < 1.5$:
+We can choose to simply remove all calls from the jobs that we believe to be overfit. For example, having looked at Figure \ref{fig:OF3}, we can specify the overfit cluster by removing all jobs with low counts in their enriched bins - for example, $\log(\lambda_1) < 1.5$:
 
 <<OF4>>=
 unreliable.jobs <- log(raw.output$QC$lambda1) < 1.5
-output.sj <- summarise.peaks(raw.output, method = "lowerbound", exclude.jobs = unreliable.jobs)
+output <- summarise.peaks(raw.output, method = "lowerbound",
+	exclude.jobs = unreliable.jobs)
 @
 
-Alternatively, from looking at either figure \ref{fig:OF3} or figure \ref{fig:OF3b}, we could try to specify the overfit cluster better by adding jobs with excessive numbers of calls e.g. $\log(calls) > 5$. This gives us two selection criteria as follows:
+Alternatively, from looking at either Figure \ref{fig:OF3} or Figure \ref{fig:OF3b}, we could try to specify the overfit cluster better by adding jobs with excessive numbers of calls e.g. $\log(calls) > 5$. This gives us two selection criteria as follows:
 
 <<OF5>>=
 unreliable.jobs2 <- log(raw.output$QC$lambda1) < 1.5 | log(raw.output$QC$calls) > 5
-output.sj2 <- summarise.peaks(raw.output, method = "lowerbound", exclude.jobs = unreliable.jobs2)
+output.2 <- summarise.peaks(raw.output, method = "lowerbound",
+	exclude.jobs = unreliable.jobs2)
 @
+
+Another method provided by the \Rpackage{BayesPeak} package is the ability to define an overfit cluster on one of the above plots by drawing a polygon onto it. This is achieved via use of the \texttt{region.overfitdiag()} function (using exactly the same arguments as \texttt{plot.overfitdiag()}), which subsequently collects the job IDs of any points in that polygon for use as the \texttt{exclude.jobs} argument in \texttt{summarise.peaks}. To perform this procedure on Figure \ref{fig:OF3b}, we would use the following code:
+
+<<region.overfitdiag.help>>=
+unreliable.jobs3 <- region.overfitdiag(raw.output, whatX = "lambda1", whatY = "score",
+	logX = TRUE, logY = TRUE)
+##user defines a polygon on the resulting plot
+##left-click to place each vertex, right-click to close polygon 
+output.3 <- summarise.peaks(raw.output, method = "lowerbound",
+	exclude.jobs = unreliable.jobs3)
+@
+
+An example of a region that we might define on the plot is given in Figure \ref{fig:region.OF}.
+
+%examples
+\begin{figure}
+  \begin{center}
+    \includegraphics{regionOFdiag.pdf}
+  \end{center}
+  \caption{Application of \texttt{region.overfitdiag()} to the \texttt{raw.output} data. Jobs in the red hatched region will be excluded from the summary.}
+\label{fig:region.OF}
+\end{figure}
+
+
+Finally, for a more reproducible method of defining the overfit cluster, one could use one's favourite clustering method on the rows of the QC data, obtained as follows:
+
+<<QCcommand, term = FALSE>>=
+log(raw.output$QC[,c("calls", "score", "lambda1")])
+@
+
+Of course, the drawback of such methods is that they have no concept of selecting conservatively (i.e. picking a small overfit cluster) and may be confused by strangely-shaped or close-together clusters - therefore, direct use of output from clustering algorithms should be treated with care. 
 
 %%example
 
@@ -406,6 +468,25 @@ output.sj2 <- summarise.peaks(raw.output, method = "lowerbound", exclude.jobs = 
 %output <- combine.peaks(output, method = "lowerbound")
 %@
 %In the second case, by making the variance of $\alpha_1$ and $\beta_1$ very small, we have essentially set: $$\lambda_1 \sim gamma(2.5, 0.25)$$
+
+
+\section{Assessing convergence}
+\label{convergence}
+
+If desired, we can assess the convergence of the MCMC chains by examining the parameter samples obtained. The output of the parameter samples from job $i$ is given in \texttt{raw.output\$p.samples[[i]]}, with half of the data discarded as burn-in and samples taken every 10 iterations. This data can be imported into MCMC packages, such as the CRAN packages \Rpackage{coda} and \Rpackage{boa}, allowing use of their inbuilt convergence assessment functions.
+
+For example, we can assess the convergence of job 316 with \Rpackage{coda}, using the Geweke diagnostic, with the following code. This code requires that \Rpackage{coda} has been installed from CRAN.
+
+<<coda, eval = FALSE>>=
+data(raw.output)
+library(coda)
+mcmc.job1 <- mcmc(raw.output$p.samples[[316]], thin = 10)
+geweke.diag(mcmc.job1)
+@
+
+More information on the interpretation of this diagnostic can be found in the individual packages' help files, and in \citep{Geweke1992}.
+
+If convergence is deemed unsatisfactory, this may be solved by increasing the \texttt{iterations} parameter in the \texttt{bayespeak()} function.
 
 
 

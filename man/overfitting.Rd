@@ -17,7 +17,9 @@ plot.overfitdiag(x, whatX = "lambda1", whatY = "score",
 identify.overfitdiag(x, whatX = "lambda1", whatY = "score",
 	logX = TRUE, logY = FALSE,
 	main = "Overfitting diagnostic", ...)
-region.overfitdiag(x, ...)
+region.overfitdiag(x, whatX = "lambda1", whatY = "score",
+	logX = TRUE, logY = FALSE,
+	main = "Overfitting diagnostic", ...)
 }
 
 \arguments{

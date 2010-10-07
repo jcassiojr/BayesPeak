@@ -48,6 +48,10 @@ plot.bed <- function(x, chr, start, end, strand = "+", bin = 50L, ...)
 
 plot.PP <- function(x, job, breaks =150L, ...)
 {
+	job <- as.integer(job)
+	max.job <- max(x$QC$job)
+	if(job > max.job) {stop("Job ", job, " not in output - largest job number is ", max.job)}
+
 	bin.width <- x$peaks$end[1] - x$peaks$start[1]
 
 	for(i in job)

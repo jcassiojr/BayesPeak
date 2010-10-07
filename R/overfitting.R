@@ -96,6 +96,6 @@ region.overfitdiag <- function(x, whatX = "lambda1", whatY = "score", logX = TRU
 		return(which(sel))
 	}
 
-	else{message("Not a polygon.")}
+	else{message("Not a polygon - NULL returned.")}
 }
 
