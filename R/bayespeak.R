@@ -621,6 +621,9 @@ summarise.peaks <- function(x, threshold = 0.5, method = c("lowerbound", "max"),
 	IRanges::RangedData(IRanges(start = output$start, end = output$end), PP = output$PP, space = output$chr)
 }
 
+##alias
+summarize.peaks <- summarise.peaks
+
 ##-----------------------------------
 ##take.union - take the union of a matrix of intervals (ie on a single chromosome)
 

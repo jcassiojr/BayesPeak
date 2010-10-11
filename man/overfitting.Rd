@@ -57,7 +57,7 @@ region.overfitdiag(x, whatX = "lambda1", whatY = "score",
 
 	\code{identify.overfitdiag} is used after a call \code{plot.overfitdiag}, with the same arguments, to find out which job was plotted at a particular location. The interface is operated in the same manner as \code{\link{identify}} - left-click on the plot to label the job closest to that point, and right-click on the plot to end this process.
 
-	\code{region.overfitdiag} is used to define an overfit region on the plot, and return the jobs in the region. The function is used in the same manner as \code{\link{locator}} - left-click on the plot to define the vertices of a polygon, and then right click anywhere to close the polygon (there is no need to left-click on the first vertex again). The area selected will be filled in with red hatching. The function then returns the IDs of the jobs in the hatched area. Typically, this output will be used as an \code{exclude.jobs} argument in \code{\link{summarise.peaks}}
+	\code{region.overfitdiag} is used to define an overfit region on the plot, and return the jobs in the region. The function is used in the same manner as \code{\link{locator}} - left-click on the plot to define the vertices of a polygon, and then right click anywhere to close the polygon (there is no need to left-click on the first vertex again). The area selected will be filled in with red hatching. The function then returns the IDs of the jobs in the hatched area. Typically, this output will be used as an \code{exclude.jobs} argument in \code{\link{summarize.peaks}}
 }
 
 \value{
@@ -87,7 +87,7 @@ identify.overfitdiag(raw.output, whatX="calls", logX = TRUE, whatY = "score", lo
 ##define an overfit region
 ##left-click to define the polygon vertices, right-click to close the polygon
 sel <- region.overfitdiag(raw.output, whatX="calls", logX = TRUE, whatY = "score", logY = TRUE)
-output <- summarise.peaks(raw.output, exclude.jobs = sel)
+output <- summarize.peaks(raw.output, exclude.jobs = sel)
 
 }
 

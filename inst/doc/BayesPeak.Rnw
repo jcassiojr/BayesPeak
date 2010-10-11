@@ -89,7 +89,7 @@ The following code is a very simple example of a \Rpackage{BayesPeak} workflow, 
 <<ex1, eval=FALSE>>=
 raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed",
 			chr = "chr16", start = 9.2E7, end = 9.5E7, job.size = 6E6)
-output <- summarise.peaks(raw.output, method = "lowerbound")
+output <- summarize.peaks(raw.output, method = "lowerbound")
 @
 
 \begin{itemize}
@@ -98,15 +98,15 @@ output <- summarise.peaks(raw.output, method = "lowerbound")
 In a valid bed file, each row of the file contains information for a single read. In particular, the chromosome, start position, end position and DNA strand appear in the 1st, 2nd, 3rd and 6th columns respectively.
 
 The function applies the algorithm to 6 Mb partitions of the genome (or ``jobs") by default, as explained in section \ref{algorithm}.
-\item \texttt{raw.output} is a list - it contains not only the bins called, but also some useful QC information (such as the model fit - in particular, this can be used to spot unreliable jobs as described in section \ref{overfitting}). This output needs to be summarised.
-\item \texttt{summarise.peaks()} is used to summarise the \texttt{raw.output} object. This consolidates the raw bin calls into peaks and combines data across jobs.
+\item \texttt{raw.output} is a list - it contains not only the bins called, but also some useful QC information (such as the model fit - in particular, this can be used to spot unreliable jobs as described in section \ref{overfitting}). This output needs to be summarized.
+\item \texttt{summarize.peaks()} is used to summarize the \texttt{raw.output} object. This consolidates the raw bin calls into peaks and combines data across jobs.
 \end{itemize}
 
 We can analyse all of the data present in the .bed file with the following command, although this will take somewhat longer. 
 
 <<ex2, eval=FALSE>>=
 raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed")
-output <- summarise.peaks(raw.output, method = "lowerbound")
+output <- summarize.peaks(raw.output, method = "lowerbound")
 @
 
 A parallelisation strategy is
@@ -165,15 +165,15 @@ This feature requires the \Rpackage{multicore} package to be installed. At time 
 library(multicore)
 raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed",
 	use.multicore = TRUE, mc.cores = 4)
-output <- summarise.peaks(raw.output, method = "lowerbound")
+output <- summarize.peaks(raw.output, method = "lowerbound")
 @
 
 
-\section{The \texttt{summarise.peaks()} function}
+\section{The \texttt{summarize.peaks()} function}
 
-The raw output of \texttt{bayespeak()} consists of the details of all of the individual bins in each individual job. The function \texttt{summarise.peaks()} combines the output of the individual jobs and joins adjacent bins into contiguous regions to give the final peak calls.
+The raw output of \texttt{bayespeak()} consists of the details of all of the individual bins in each individual job. The function \texttt{summarize.peaks()} combines the output of the individual jobs and joins adjacent bins into contiguous regions to give the final peak calls.
 
-In more detail, \texttt{summarise.peaks()} does the following:
+In more detail, \texttt{summarize.peaks()} does the following:
 \begin{itemize}
 \item Filtering of unenriched jobs: The model naturally tries to identify enriched states in the background even for jobs with consistently low read abundance. This can result in many unreliable calls and, to avoid this, all calls associated with
 such jobs can be removed. (This issue, ``overfitting", is described in detail in section
@@ -191,7 +191,7 @@ Moreover, care should be taken when even successful ChIP-seq samples are analyse
 \section{Choosing an appropriate \emph{PP} threshold value}
 \label{PPthresh}
 
-Selecting the threshold for \emph{PP} values (i.e. the threshold argument in \texttt{summarise.peaks()}) is an important step in the analysis, and its choice will affect the peaks returned. First, we will observe how the \emph{PP} values are distributed within jobs.
+Selecting the threshold for \emph{PP} values (i.e. the threshold argument in \texttt{summarize.peaks()}) is an important step in the analysis, and its choice will affect the peaks returned. First, we will observe how the \emph{PP} values are distributed within jobs.
 
 For this section, we load the example \texttt{raw.output} object included with the package:
 
@@ -400,7 +400,7 @@ We can choose to simply remove all calls from the jobs that we believe to be ove
 
 <<OF4>>=
 unreliable.jobs <- log(raw.output$QC$lambda1) < 1.5
-output <- summarise.peaks(raw.output, method = "lowerbound",
+output <- summarize.peaks(raw.output, method = "lowerbound",
 	exclude.jobs = unreliable.jobs)
 @
 
@@ -408,18 +408,18 @@ Alternatively, from looking at either Figure \ref{fig:OF3} or Figure \ref{fig:OF
 
 <<OF5>>=
 unreliable.jobs2 <- log(raw.output$QC$lambda1) < 1.5 | log(raw.output$QC$calls) > 5
-output.2 <- summarise.peaks(raw.output, method = "lowerbound",
+output.2 <- summarize.peaks(raw.output, method = "lowerbound",
 	exclude.jobs = unreliable.jobs2)
 @
 
-Another method provided by the \Rpackage{BayesPeak} package is the ability to define an overfit cluster on one of the above plots by drawing a polygon onto it. This is achieved via use of the \texttt{region.overfitdiag()} function (using exactly the same arguments as \texttt{plot.overfitdiag()}), which subsequently collects the job IDs of any points in that polygon for use as the \texttt{exclude.jobs} argument in \texttt{summarise.peaks}. To perform this procedure on Figure \ref{fig:OF3b}, we would use the following code:
+Another method provided by the \Rpackage{BayesPeak} package is the ability to define an overfit cluster on one of the above plots by drawing a polygon onto it. This is achieved via use of the \texttt{region.overfitdiag()} function (using exactly the same arguments as \texttt{plot.overfitdiag()}), which subsequently collects the job IDs of any points in that polygon for use as the \texttt{exclude.jobs} argument in \texttt{summarize.peaks}. To perform this procedure on Figure \ref{fig:OF3b}, we would use the following code:
 
 <<region.overfitdiag.help>>=
 unreliable.jobs3 <- region.overfitdiag(raw.output, whatX = "lambda1", whatY = "score",
 	logX = TRUE, logY = TRUE)
 ##user defines a polygon on the resulting plot
 ##left-click to place each vertex, right-click to close polygon 
-output.3 <- summarise.peaks(raw.output, method = "lowerbound",
+output.3 <- summarize.peaks(raw.output, method = "lowerbound",
 	exclude.jobs = unreliable.jobs3)
 @
 

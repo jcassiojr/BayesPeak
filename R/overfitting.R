@@ -58,7 +58,7 @@ region.overfitdiag <- function(x, whatX = "lambda1", whatY = "score", logX = TRU
 	##How to use this function:
 	##Left click to define the vertices of a polygon. To close polygon off, right click.
 	##Red hatched area shows the selection
-	##Output can be fed into summarise.peaks as exclude.jobs parameter
+	##Output can be fed into summarize.peaks as exclude.jobs parameter
 
 	raw <- x
 

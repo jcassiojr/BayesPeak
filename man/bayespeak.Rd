@@ -109,7 +109,7 @@ bayespeak(treatment, control, chr = NULL, start,
 		\item p.samples: A \code{list} of \code{matrix} objects, each containing parameter samples from the MCMC runs. \code{p.samples[[i]]} corresponds to the samples taken in job \code{i}. Samples are taken every 10 iterations, with the first half of the run being discarded, and to avoid using too much memory, not all parameters are given. This output can be used to assess convergence e.g. using the CRAN packages coda or boa. (see the vignette - \code{vignette("BayesPeak")})
 	}
 
-		Note that the raw output of this function is not intended to be used directly as results - the output should be summarised using the \code{\link{summarise.peaks}} function before using it in later analysis.
+		Note that the raw output of this function is not intended to be used directly as results - the output should be summarized using the \code{\link{summarize.peaks}} function before using it in later analysis.
 
 }
 
@@ -130,7 +130,7 @@ bayespeak(treatment, control, chr = NULL, start,
 
 
 \seealso{
-	\code{\link{read.bed}}, \code{\link{summarise.peaks}}.
+	\code{\link{read.bed}}, \code{\link{summarize.peaks}}.
 }
 
 
@@ -142,13 +142,13 @@ input <- file.path(dir, "Inputreduced.bed")
 ##look at specific region 92-95Mb on chromosome 16
 ##(we've used half the number of iterations here to reduce the time this example takes)
 raw.output <- bayespeak(treatment, input, chr = "chr16", start = 9.2E7, end = 9.5E7, iterations = 5000L, use.multicore = TRUE) 
-output <- summarise.peaks(raw.output)
+output <- summarize.peaks(raw.output)
 output
 
 \dontrun{
 ##analyse all data in file
 raw.output.wg <- bayespeak(treatment, input, use.multicore = TRUE)
-output <- summarise.peaks(raw.output.wg)
+output <- summarize.peaks(raw.output.wg)
 	}
 }
 %\keyword{}

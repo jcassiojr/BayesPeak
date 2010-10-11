@@ -1,12 +1,15 @@
-\name{summarise.peaks}
+\name{summarize.peaks}
 \alias{summarise.peaks}
-\title{Summarise Peaks}
+\alias{summarize.peaks}
+\title{Summarize Peaks}
 
 \description{
-  Summarise Peaks - Combine the potentially enriched bins found by BayesPeak into contiguous peaks, and associate each with a posterior probability.
+  Summarize Peaks - Combine the potentially enriched bins found by BayesPeak into contiguous peaks, and associate each with a posterior probability.
+  \code{summarise.peaks} is an alias for \code{summarize.peaks}
 }
 
 \usage{
+summarize.peaks(x, threshold = 0.5, method = c("lowerbound", "max"), exclude.jobs = NULL)
 summarise.peaks(x, threshold = 0.5, method = c("lowerbound", "max"), exclude.jobs = NULL)
 }
 
@@ -77,11 +80,11 @@ input <- file.path(dir, "Inputreduced.bed")
 ##look at specific region 92-95Mb on chromosome 16
 ##(we've used half the number of iterations here to reduce the time this example takes)
 raw.output <- bayespeak(treatment, input, chr = "chr16", start = 9.2E7, end = 9.5E7, iterations = 5000L, use.multicore = TRUE)
-output <- summarise.peaks(raw.output)
+output <- summarize.peaks(raw.output)
 output
 
 ##higher threshold
-output.ht <- summarise.peaks(raw.output, threshold = 0.9)
+output.ht <- summarize.peaks(raw.output, threshold = 0.9)
 output.ht
 
 }
