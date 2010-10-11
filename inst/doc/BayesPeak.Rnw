@@ -46,7 +46,7 @@
 
 \section*{Introduction}
 
-\Rpackage{BayesPeak} is a Bioconductor package for the analysis of data sets from ChIP-seq experiments, particularly for identifying the genomic sites of protein--DNA interactions.
+\Rpackage{BayesPeak} is a Bioconductor package for the analysis of data sets from ChIP-seq experiments, particularly for identifying the genomic sites of protein--DNA interactions. The model is designed for use on transcription factor data sets, and on H3K4me3 histone mark data sets (in which the peak structure is similar to that found in a transcription factor data set.
 
 The algorithm models the positions and orientations of the sequenced fragments and determines the locations of enriched areas, corresponding to binding sites and histone modifications, by using a hidden Markov model and Bayesian statistical methodology.
 
@@ -55,7 +55,7 @@ The Bayesian approach to parameter and state estimation returns posterior probab
 The other important feature of the algorithm is the use of the negative binomial distribution to model the counts of sequenced reads. This allows for overdispersion and provides a better fit to the data than the Poisson distribution that has been widely used by other methods. 
 
 \section{What is ChIP-seq?}
-Chromatin ImmunoPrecipitation (ChIP) is an experiment designed to study protein-DNA interactions, particularly to identify the genomic sites where proteins, such as transcription factors, bind to the DNA, or sites where histone modifications occur \citep{schmidt2009chip}. The experiment produces samples that are enriched for the sites of interest compared to the rest of the genome. The use of this method combined with high-throughput sequencing of the samples is referred to as ChIP-seq. 
+Chromatin ImmunoPrecipitation (ChIP) is an experiment designed to study protein-DNA interactions, particularly to identify the genomic sites where proteins, such as transcription factors, bind to the DNA, or sites where histone modifications occur \citep{Robertson2007}. The experiment produces samples that are enriched for the sites of interest compared to the rest of the genome. The use of this method combined with high-throughput sequencing of the samples is referred to as ChIP-seq. 
 
 Given our protein of interest, the ChIP-seq protocol usually consists of the following steps. (The exact protocol may vary between different experiments, but \Rpackage{BayesPeak} will still be able to perform the peak-calling step.)
 	\begin{itemize}
@@ -63,8 +63,7 @@ Given our protein of interest, the ChIP-seq protocol usually consists of the fol
 		\item Shearing - The cells are lysed, and the DNA is randomly cut into small fragments by sonication.
 		\item Immunoprecipitation - An antibody specific to the protein of interest is used to isolate the protein and the attached DNA fragments. The resulting sample is enriched for those genomic regions. If we are instead interested in locating histones with a certain epigenetic modification, then we use an antibody specific to histones with that modification.
 		\item Reverse crosslinking and purification - The bonds between the protein and DNA are broken. The DNA is subsequently purified.
-		\item Sequencing - During library preparation the contents of the samples are size selected such that the fragments' length lies in the region of 200-300 bp. This step is required by the sequencing protocol.  Adaptors are attached to the fragments and amplification usually takes place.
-Subsequently, the sample undergoes ``high-throughput sequencing" during which the sequences of the ends of the present fragments are identified. For ChIP-seq applications usually one end of each fragment is sequenced to produce ``single-end" reads.
+		\item Sequencing - The contents of the samples are size selected such that the fragments' length lies in the region of 200-300 bp. This step is required by the sequencing protocol.  Adaptors are attached to the fragments and amplification usually takes place. Subsequently, the sample undergoes ``high-throughput sequencing" during which the sequences of the ends of the present fragments are identified. For ChIP-seq applications usually one end of each fragment is sequenced to produce ``single-end" reads.
 		\item Alignment - The DNA is aligned back to reference genome, taking the quality of the reads into account. Usually only the reads that map to unique locations in the genome are included in the downstream analysis.
 		\item Analysis - The sites of interest correspond to the genomic regions where there is high abundance of reads compared to the background or the control sample. \Rpackage{BayesPeak} performs this identification step, also referred to as ``peak-calling".
 	\end{itemize}
@@ -82,7 +81,7 @@ Load the package as follows:
 library(BayesPeak)
 @
 
-The example data set used below, consisting of the files ``H3K4me3-chr16.bed" and ``Input-chr16.bed", can be downloaded from \newline\texttt{http://www.compbio.group.cam.ac.uk/Resources/BayesPeak/csbayespeak.html}.
+The example data set used below, consisting of the files ``H3K4me3-chr16.bed" and ``Input-chr16.bed", can be downloaded from \newline\texttt{http://www.compbio.group.cam.ac.uk/Resources/BayesPeak/csbayespeak.html}. These data were generated from a histone mark ChIP-seq experiment, performed on mouse chromosome 16. (Other data sets will contain data from multiple chromosomes - there is no need to split these up.) %FIXME
 
 The following code is a very simple example of a \Rpackage{BayesPeak} workflow, where we analyse the region 92,000,000 - 95,000,000 bp on chromosome 16. It should take a couple of minutes on a relatively modern machine.
 
@@ -93,7 +92,7 @@ output <- summarize.peaks(raw.output, method = "lowerbound")
 @
 
 \begin{itemize}
-\item \texttt{bayespeak()} runs the actual BayesPeak algorithm on the data. The two input files are bed files located in the working directory, with H3K4me3 being the IP-treated data set and Input ID being the control data. In each case, we could have provided a data.frame or a RangedData object (from the IRanges package) instead of a file path.
+\item \texttt{bayespeak()} runs the actual BayesPeak algorithm on the data. The two input files are bed files located in the working directory, with H3K4me3 being the IP-treated data set and Input ID being the control data. In each case, we could have provided a data.frame or a RangedData object (from the \Rpackage{IRanges} package) instead of a file path. (A GRange from the \Rpackage{GenomicRanges} package can trivially be coerced to a RangedData object, using the \texttt{as} function.)
 
 In a valid bed file, each row of the file contains information for a single read. In particular, the chromosome, start position, end position and DNA strand appear in the 1st, 2nd, 3rd and 6th columns respectively.
 
@@ -109,9 +108,7 @@ raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed")
 output <- summarize.peaks(raw.output, method = "lowerbound")
 @
 
-A parallelisation strategy is
-available to reduce the running time of this process, which is given in section \ref{MC}.
-We now go into this workflow in more depth.
+A parallelisation strategy is available to reduce the running time of this process, which is given in section \ref{MC}. We now go into this workflow in more depth.
 
 
 \section{The algorithm}
@@ -125,13 +122,13 @@ Within a job, we divide the region into small bins (by default, 100 bases each),
 
 A hidden Markov model is fitted to the bins, thereby classifying them as enriched or unenriched for sites of interest. However, since the parameters of the model are unknown (for example, the mean number of counts within enriched or unenriched bins), we estimate them by sampling from their posterior distributions using MCMC methods.
 
-The output of the algorithm is the Posterior Probability (often abbreviated to \emph{PP}) of each bin being enriched. The \emph{PP} value is useful not only for calling the peaks, but could also be used in downstream analysis - for example, to weight observations when searching for a novel transcription factor motif. The \emph{PP} value is not to be confused with the \emph{p} value from hypothesis testing.
+The output of the algorithm is the Posterior Probability (often abbreviated to \emph{PP}) of each bin being enriched. The \emph{PP} value is useful not only for calling the peaks, but could also be used in downstream analyses - for example, to weight observations when searching for a novel transcription factor motif. The \emph{PP} value is not to be confused with the \emph{p} value from hypothesis testing.
 
 For a full description of the model, please refer to \citep{spyrou2009bayespeak}.
 
 \section{The \texttt{bayespeak()} function}
 
-The \texttt{bayespeak()} function performs the algorithm described above on two sets of data - treatment, and control (optional), which should be supplied in bed format. Each of these can be specified as a file location, a data.frame containing the columns ``chr", ``start", ``end", ``strand" (specified as forward, ``+", or reverse, ``-"), or a RangedData object from the \Rpackage{IRanges} package in BioConductor. For example:
+The \texttt{bayespeak()} function performs the algorithm described above on a given experiment, consisting of either one or two data sets - a treated data set must be supplied, which can optionally be complemented by a control data set. Each of these data sets must be in .bed format, and can be specified as a file location, a data.frame containing the columns ``chr", ``start", ``end", ``strand" (specified as forward, ``+", or reverse, ``-"), or a RangedData object from the \Rpackage{IRanges} package in BioConductor. For example:
 
 <<Help, eval=FALSE>>=
 raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed")
@@ -157,7 +154,7 @@ The output of this function is a list of four things:
 
 Due to its computational intensity, \Rpackage{BayesPeak} can be slow. However, the jobs can be run in parallel. This allows us to take advantage of multiple processors and dramatically reduce the time the algorithm takes.
 
-This feature requires the \Rpackage{multicore} package to be installed. At time of writing, it can be downloaded from \texttt{http://www.rforge.net/multicore/}.
+This feature requires the \Rpackage{multicore} package to be installed. At time of writing, it can be downloaded from \texttt{http://www.rforge.net/multicore/} and is available for Mac or Linux.
 
 \begin{sloppypar}Having installed \Rpackage{multicore}, you can run the \texttt{bayespeak()} function in parallel by using the \texttt{use.multicore = TRUE} option. You can override the number of cores that multicore uses with the \texttt{mc.cores} argument.\end{sloppypar}
 
@@ -180,7 +177,7 @@ such jobs can be removed. (This issue, ``overfitting", is described in detail in
 \ref{overfitting}.)
 \item Filtering of unenriched bins: We remove all bins whose \emph{PP} values are below a certain value (see section \ref{PPthresh}).
 \item Assembly of enriched bins: The bins across all remaining jobs are collected together. If two jobs call exactly the same bin, which could happen in regions where jobs overlap, then the one with the larger \emph{PP} value is used.
-\item Conversion of bins to peaks: Where a number of bins form a contiguous region, we combine them into one large peak. The large peak now is assigned a \emph{PP} value, based on the \emph{PP} values of its component bins. Combining the \emph{PP} values from multiple bins may be done in several ways. As a default, the ``lowerbound" method is used, which calculates a lower bound for the overall \emph{PP} by a dynamic programming technique. (See the help file for more information.)
+\item Conversion of bins to peaks: Where a number of bins form a contiguous region, we combine them into one large peak. The large peak is assigned a \emph{PP} value, based on the \emph{PP} values of its component bins. Combining the \emph{PP} values from multiple bins may be done in several ways. By default, the ``lowerbound" method is used, which calculates a lower bound for the overall \emph{PP} by a dynamic programming technique. (See the help file for more information.) The alternative method that the package provides is the ``max" method, which simply takes the maximum \emph{PP} value in the component bins and is therefore ill-equipped to provide appropriate credit for sustained regions of moderate enrichment.
 \end{itemize}
 
 \section{Examining the results}
@@ -254,7 +251,7 @@ i <- 324
 plot.PP(raw.output, job = i, ylim = c(0,50))
 @
 
-The plot is given in figure \ref{fig:job324}
+The plot is given in Figure \ref{fig:job324}
 
 \begin{figure}
 \begin{center}
@@ -281,7 +278,7 @@ i <- 325
 plot.PP(raw.output, job = i, ylim = c(0,50))
 @
 
-The plot is given in figure \ref{fig:job325}.
+The plot is given in Figure \ref{fig:job325}.
 
 \begin{figure}
 \begin{center}
@@ -289,7 +286,7 @@ The plot is given in figure \ref{fig:job325}.
 <<job325>>
 @
 \end{center}
-\caption{A histogram of the \emph{PP} values found in job 325. The PP values are more evenly distributed over the interval (0,1) than they are in figure \ref{fig:job324}.}
+\caption{A histogram of the \emph{PP} values found in job 325. The PP values are more evenly distributed over the interval (0,1) than they are in Figure \ref{fig:job324}.}
 \label{fig:job325}
 \end{figure}
 
@@ -309,7 +306,7 @@ For this section, we again load the example \texttt{raw.output} object included 
 data(raw.output)
 @
 
-The model assumes that there are both unenriched and enriched regions present. When the data contains no enriched regions, the model still tries to identify peaks in the data. Since some bins in the background will have higher counts than others, purely by chance, these will be marked as enriched. (See figure \ref{fig:OF}.)
+The model assumes that there are both unenriched and enriched regions present. When the data contains no enriched regions, the model still tries to identify peaks in the data. Since some bins in the background will have higher counts than others, purely by chance, these will be marked as enriched. (See Figure \ref{fig:OF}.)
 
 %examples
 \begin{figure}
@@ -350,7 +347,7 @@ plot.overfitdiag(raw.output, whatX = "calls", whatY = "score",
 	logX = TRUE, logY = TRUE)
 @
 
-The plots generated are given in figures \ref{fig:OF3} and \ref{fig:OF3b}. Two clusters are visible in each, one of which is a cluster of jobs suffering from overfitting. 
+The plots generated are given in Figures \ref{fig:OF3} and \ref{fig:OF3b}. Two clusters are visible in each, one of which is a cluster of jobs suffering from overfitting. 
 
 
 \begin{figure}
@@ -483,6 +480,17 @@ library(coda)
 mcmc.job1 <- mcmc(raw.output$p.samples[[316]], thin = 10)
 geweke.diag(mcmc.job1)
 @
+
+\begin{verbatim}
+Fraction in 1st window = 0.1
+Fraction in 2nd window = 0.5 
+
+       p    theta       a0       b0  lambda0       a1       b1  lambda1 
+  0.6900  -0.1239  -0.4860  -0.7983   1.9774   0.5859  -0.3364   0.3297 
+loglhood 
+  0.3716
+\end{verbatim}
+
 
 More information on the interpretation of this diagnostic can be found in the individual packages' help files, and in \citep{Geweke1992}.
 
