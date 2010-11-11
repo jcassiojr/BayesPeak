@@ -110,6 +110,7 @@ bin.strand <- function(strand, chr, region = NULL, bin.size = 100L) ## bed is: $
 	breaks.offset <- seqcover(from = region[1], to = region[2], by = bin.size, offset = floor(bin.size/2))
 
 	##binning
+	##NB in this line, we are also removing duplicates (i.e. multiple reads mapping to the same place)
 	bin <- list(norm = hist(unique(x.sel$x[sel]), breaks, plot = FALSE)$counts,
 	            off = hist(unique(x.sel$x[sel]), breaks.offset, plot = FALSE)$counts)
 

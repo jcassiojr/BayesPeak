@@ -92,7 +92,7 @@ output <- summarize.peaks(raw.output, method = "lowerbound")
 @
 
 \begin{itemize}
-\item \texttt{bayespeak()} runs the actual BayesPeak algorithm on the data. The two input files are bed files located in the working directory, with H3K4me3 being the IP-treated data set and Input ID being the control data. In each case, we could have provided a data.frame or a RangedData object (from the \Rpackage{IRanges} package) instead of a file path. (A GRange from the \Rpackage{GenomicRanges} package can trivially be coerced to a RangedData object, using the \texttt{as} function.)
+\item \texttt{bayespeak()} runs the actual BayesPeak algorithm on the data. The two input files are bed files located in the working directory, with H3K4me3 being the IP-treated data set and Input ID being the control data. In each case, we could have provided a data.frame or a RangedData object (from the \Rpackage{IRanges} package) instead of a file path. (A GRange from the \Rpackage{GenomicRanges} package can trivially be coerced to a RangedData object, using the \texttt{as()} function.)
 
 In a valid bed file, each row of the file contains information for a single read. In particular, the chromosome, start position, end position and DNA strand appear in the 1st, 2nd, 3rd and 6th columns respectively.
 
@@ -100,6 +100,13 @@ The function applies the algorithm to 6 Mb partitions of the genome (or ``jobs")
 \item \texttt{raw.output} is a list - it contains not only the bins called, but also some useful QC information (such as the model fit - in particular, this can be used to spot unreliable jobs as described in section \ref{overfitting}). This output needs to be summarized.
 \item \texttt{summarize.peaks()} is used to summarize the \texttt{raw.output} object. This consolidates the raw bin calls into peaks and combines data across jobs.
 \end{itemize}
+
+The output can now be saved to disk with the \texttt{export()} function from the \Rpackage{rtracklayer} package. For example:
+<<savetodisk, eval=FALSE>>=
+library(rtracklayer)
+export(output, "H3K4me3output.bed")
+export(output, "H3K4me3output.gff")
+@
 
 We can analyse all of the data present in the .bed file with the following command, although this will take somewhat longer. 
 
