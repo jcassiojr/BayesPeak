@@ -329,6 +329,7 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 			job.bins <- paste(bin.start, ":", bin.end, sep = "")
 			job.start <- region[1] + bin.size * (bin.start - 1)
 			job.end <- region[1] + bin.size * (bin.end)
+
 			n.jobs <- length(job.start)
 
 			##Get var, autocov (we calculate autocorr later)
@@ -368,7 +369,10 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 				##jobs need to overlap, so dilate the jobs a bit
 				bin.start[-1] <- bin.start[-1] - job.overlap
 				bin.end[-length(bin.start)] <- bin.end[-length(bin.start)] + job.overlap
+				##but stop them dilating too far...
+				bin.end <- pmin(bin.end, rep(n, length(bin.end)))
 
+				##convert bins -> chromosome loci
 				job.bins <- paste(bin.start, ":", bin.end, sep = "")
 				job.start <- region[1] + bin.size * (bin.start - 1) - floor(bin.size/2)
 				job.end <- region[1] + bin.size * (bin.end) - floor(bin.size/2)
