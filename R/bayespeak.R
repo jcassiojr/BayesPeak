@@ -120,10 +120,11 @@ bin.strand <- function(strand, chr, region = NULL, bin.size = 100L) ## bed is: $
 ##-----------------------------------
 ##bayespeak - main function
 
-bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100L, iterations = 10000L, repeat.offset = TRUE, into.jobs = TRUE, job.size = 6E6L, job.overlap = 20L, use.multicore = FALSE, mc.cores = getOption("cores"), prior = c(5, 5, 10, 5, 25, 4, 0.5, 5), report.p.samples = TRUE)
+bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100L, iterations = 10000L, repeat.offset = TRUE, into.jobs = TRUE, job.size = 6E6L, job.overlap = 20L, use.multicore = FALSE, mc.cores = getOption("cores"), snow.cluster, prior = c(5, 5, 10, 5, 25, 4, 0.5, 5), report.p.samples = TRUE)
 {
 	if(missing(start)) {start <- NA}
 	if(missing(end)) {end <- NA}
+	if(missing(snow.cluster)) {snow.cluster <- NULL}
 
 	##A little bit of parameter checking:
 	if(!any(is.na(start)) && !any(is.na(end))) ##don't check start and end if they need to be estimated
@@ -136,12 +137,29 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 			if(!(length(end) %in% c(1, length(chr)))) {stop("stop length must be 1 or the same as chr")}
 		}
 	}
+
+
+## investigate parallel processing procedure
+
 	if(use.multicore && !("multicore" %in% names(sessionInfo()$otherPkgs)))
 	{
 		message("\nPackage 'multicore' is not loaded - parallel processing disabled. Please load multicore with library(multicore). (See ?bayespeak for more information.)\n")
 		use.multicore = FALSE
 	}
+
+	if(!is.null(snow.cluster) && !("snow" %in% names(sessionInfo()$otherPkgs)))
+	{
+		message("\nPackage 'snow' is not loaded - parallel processing disabled. Please load multicore with library(snow). (See ?bayespeak for more information.)\n")
+		snow.cluster <- NULL
+	}
 	
+	if(use.multicore && !is.null(snow.cluster))
+	{
+		message("'snow.cluster' specified, so ignoring 'use.multicore = TRUE' argument.")
+		use.multicore = FALSE
+	}
+
+
 	##check prior (if it's very likely that a_0, b_0, a_1, b_1 < 0.0001 then bayespeak will hang)
 	##we are enforcing E(a_i) > 0.0001, E(b_i) > 0.0001
 	sel <- matrix(prior, ncol = 2, byrow = TRUE)
@@ -404,9 +422,12 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 
 			jobs <- as.list(jobs)
 
-			##go for it
-			if(use.multicore)
+			##run algorithm (with appropriate parallel method)
+
+			if(!is.null(snow.cluster))
 			{
+				output <- snow::clusterApplyLB(snow.cluster, jobs, function(x){eval(parse(text = x))})
+			} else if(use.multicore) {
 				output <- multicore::mclapply(jobs, function(x){eval(parse(text = x))}, mc.cores = mc.cores)
 			} else {
 				output <- lapply(jobs, function(x){eval(parse(text = x))})

@@ -11,7 +11,7 @@ bayespeak(treatment, control, chr = NULL, start,
 	end, bin.size = 100L, iterations = 10000L,
 	repeat.offset = TRUE, into.jobs = TRUE, job.size = 6E6L,
 	job.overlap = 20L, use.multicore = FALSE,
-	mc.cores = getOption("cores"),
+	mc.cores = getOption("cores"), snow.cluster,
 	prior = c(5, 5, 10, 5, 25, 4, 0.5, 5),
 	report.p.samples = TRUE)
 }
@@ -74,6 +74,10 @@ bayespeak(treatment, control, chr = NULL, start,
 
 	\item{mc.cores}{
 		Numeric. The number of cores to be used for parallel processing. This argument is passed directly to the \code{\link[multicore]{mclapply}} function.
+	}
+
+	\item{snow.cluster}{
+		Cluster object. A cluster to be used for parallel processing, as per the \code{snow} package. A cluster can be created via the \code{\link[snow]{makeCluster}} function.
 	}
 
 	\item{prior}{

@@ -115,7 +115,7 @@ raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed")
 output <- summarize.peaks(raw.output, method = "lowerbound")
 @
 
-A parallelisation strategy is available to reduce the running time of this process, which is given in section \ref{MC}. We now go into this workflow in more depth.
+A parallelization strategy is available to reduce the running time of this process, which is given in section \ref{MC}. We now go into this workflow in more depth.
 
 
 \section{The algorithm}
@@ -156,12 +156,18 @@ The output of this function is a list of four things:
 \item \texttt{raw.output\$p.samples}: A list of parameter samples from the MCMC runs. This output can be used to assess convergence e.g. by applying the Geweke test through the CRAN packages \Rpackage{coda} or \Rpackage{boa}. See section \ref{convergence} for more details.
 \end{itemize}
 
-\subsection{Parallelising \Rpackage{BayesPeak} - use of the multicore package}
+%%
+
+\subsection{Parallelizing \Rpackage{BayesPeak}}
 \label{MC}
 
 Due to its computational intensity, \Rpackage{BayesPeak} can be slow. However, the jobs can be run in parallel. This allows us to take advantage of multiple processors and dramatically reduce the time the algorithm takes.
 
-This feature requires the \Rpackage{multicore} package to be installed. At time of writing, it can be downloaded from \texttt{http://www.rforge.net/multicore/} and is available for Mac or Linux.
+\Rpackage{BayesPeak} optionally supports two packages for parallelization: \Rpackage{multicore} and \Rpackage{snow}. Note that if both options are enabled, then the \Rpackage{snow} cluster will take precedence.
+
+\subsubsection{multicore}
+
+At the time of writing, the \Rpackage{multicore} package can be downloaded from \texttt{http://www.rforge.net/multicore/} and is available for Mac or Linux.
 
 \begin{sloppypar}Having installed \Rpackage{multicore}, you can run the \texttt{bayespeak()} function in parallel by using the \texttt{use.multicore = TRUE} option. You can override the number of cores that multicore uses with the \texttt{mc.cores} argument.\end{sloppypar}
 
@@ -172,6 +178,27 @@ raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed",
 output <- summarize.peaks(raw.output, method = "lowerbound")
 @
 
+\subsubsection{snow}
+
+With the use of functionality from the \Rpackage{snow} package, \Rpackage{BayesPeak} can be run on a cluster of machines.
+
+The \Rpackage{snow} package is available from CRAN and, therefore, can be directly installed with the command \texttt{install.packages("snow")}. 
+
+One can create a cluster and use it to parallelize the \texttt{bayespeak()} function. For example:
+
+<<Help, eval=FALSE>>=
+library(snow)
+cl <- makeCluster(4, type="SOCK") ##adapt this line as appropriate for your cluster
+clusterEvalQ(cl, library(BayesPeak)) ##load BayesPeak on the cluster
+raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed",
+	snow.cluster = cl)
+output <- summarize.peaks(raw.output, method = "lowerbound")
+@
+
+NB: If \Rpackage{snow} support is active, then \texttt{bayespeak()} will not display the progress that has been made through a chromosome. It will, however, display when a chromosome is complete.
+
+
+%%
 
 \section{The \texttt{summarize.peaks()} function}
 
