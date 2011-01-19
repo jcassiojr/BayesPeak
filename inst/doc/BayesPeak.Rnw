@@ -101,22 +101,33 @@ The function applies the algorithm to 6 Mb partitions of the genome (or ``jobs")
 \item \texttt{summarize.peaks()} is used to summarize the \texttt{raw.output} object. This consolidates the raw bin calls into peaks and combines data across jobs.
 \end{itemize}
 
-The output can now be saved to disk with the \texttt{export()} function from the \Rpackage{rtracklayer} package. For example:
-<<savetodisk, eval=FALSE>>=
-library(rtracklayer)
-export(output, "H3K4me3output.bed")
-export(output, "H3K4me3output.gff")
-@
-
-We can analyse all of the data present in the .bed file with the following command, although this will take somewhat longer. 
+We can analyse all of the data present in the .bed file with the following code, although this will take somewhat longer. 
 
 <<ex2, eval=FALSE>>=
 raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed")
 output <- summarize.peaks(raw.output, method = "lowerbound")
 @
 
-A parallelization strategy is available to reduce the running time of this process, which is given in section \ref{MC}. We now go into this workflow in more depth.
+A parallelization strategy is available to reduce the running time of this process, which is given in section \ref{MC}.
 
+\subsection{Exporting output}
+
+The output can now be saved to disk with the \texttt{export()} function from the \Rpackage{rtracklayer} package. Many standard file formats are supported - for example:
+<<savetodisk, eval=FALSE>>=
+library(rtracklayer)
+export(output, "H3K4me3output.bed")
+export(output, "H3K4me3output.gff")
+@
+
+These examples, however, will only output peak regions - they will not export the posterior probability associated with each peak. To export the full output, one can coerce the output to a data frame, and export this with standard output functions provided in R. For example:
+
+<<savetodisk2, eval=FALSE>>=
+write.table(as.data.frame(output), file = "H3K4me3output.txt", quote = FALSE)
+write.csv(as.data.frame(output), file = "H3K4me3output.csv", quote = FALSE)
+@
+
+
+We now go into this workflow in more depth.
 
 \section{The algorithm}
 \label{algorithm}
