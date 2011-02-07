@@ -46,7 +46,7 @@
 
 \section*{Introduction}
 
-\Rpackage{BayesPeak} is a Bioconductor package for the analysis of data sets from ChIP-seq experiments, particularly for identifying the genomic sites of protein--DNA interactions. The model is designed for use on transcription factor data sets, and on H3K4me3 histone mark data sets (in which the peak structure is similar to that found in a transcription factor data set.
+\Rpackage{BayesPeak} is a Bioconductor package for the analysis of data sets from ChIP-seq experiments, particularly for identifying the genomic sites of protein--DNA interactions. The model is designed for use on transcription factor data sets, and on H3K4me3 histone mark data sets (in which the peak structure is similar to that found in a transcription factor data set).
 
 The algorithm models the positions and orientations of the sequenced fragments and determines the locations of enriched areas, corresponding to binding sites and histone modifications, by using a hidden Markov model and Bayesian statistical methodology.
 
