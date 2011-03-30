@@ -547,7 +547,7 @@ If convergence is deemed unsatisfactory, this may be solved by increasing the \t
 \label{cite}
 
 \begin{flushleft}
-If you use the \Rpackage{BayesPeak} algorithm, then please cite \citep{spyrou2009bayespeak}.
+If you use the \Rpackage{BayesPeak} algorithm, then please cite \citep{cairns2011bayespeak} and \citep{spyrou2009bayespeak}.
 
 \end{flushleft}
 
