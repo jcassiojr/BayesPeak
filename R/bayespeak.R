@@ -74,7 +74,7 @@ read.bed <- function(filename, chr)
 strand.split <- function(bed) ##data frame, headings "chr", "start", "end", "strand"
 {
 	if(is.null(bed)) {return(NULL)}
-	sel <- bed$strand == "+"
+	sel <- as.factor(bed$strand) == "+"
 
 	if(class(bed) == "data.frame")
 	{
