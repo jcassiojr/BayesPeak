@@ -550,7 +550,7 @@ summarise.peaks <- function(x, threshold = 0.5, method = c("lowerbound", "max"),
 	if(is.logical(exclude.jobs)){exclude.jobs <- which(exclude.jobs)}
 
 	output <- NULL
-	chr <- unique(x$QC$chr)
+	chr <- levels(x$QC$chr)
 
 	##remove excluded jobs from peak list
 	x$peaks <- x$peaks[!(x$peaks$job %in% exclude.jobs),]
