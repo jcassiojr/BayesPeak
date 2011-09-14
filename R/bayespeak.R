@@ -78,8 +78,8 @@ strand.split <- function(bed) ##data frame, headings "chr", "start", "end", "str
 
 	if(class(bed) == "data.frame")
 	{
-		strand <- list("+" <- bed[sel, c("chr","start")], 
-		               "-" <- bed[!sel, c("chr","end")])
+		strand <- list("+" = bed[sel, c("chr","start")], 
+		               "-" = bed[!sel, c("chr","end")])
 
 		colnames(strand$"+") <- c("chr", "x")
 		colnames(strand$"-") <- c("chr", "x")
