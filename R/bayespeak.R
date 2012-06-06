@@ -120,7 +120,7 @@ bin.strand <- function(strand, chr, region = NULL, bin.size = 100L) ## bed is: $
 ##-----------------------------------
 ##bayespeak - main function
 
-bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100L, iterations = 10000L, repeat.offset = TRUE, into.jobs = TRUE, job.size = 6E6L, job.overlap = 20L, use.multicore = FALSE, mc.cores = getOption("cores"), snow.cluster, prior = c(5, 5, 10, 5, 25, 4, 0.5, 5), report.p.samples = TRUE)
+bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100L, iterations = 10000L, repeat.offset = TRUE, into.jobs = TRUE, job.size = 6E6L, job.overlap = 20L, use.multicore = FALSE, mc.cores = getOption("mc.cores", 1), snow.cluster, prior = c(5, 5, 10, 5, 25, 4, 0.5, 5), report.p.samples = TRUE)
 {
 	if(missing(start)) {start <- NA}
 	if(missing(end)) {end <- NA}
@@ -139,18 +139,11 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 	}
 
 
-## investigate parallel processing procedure
+## do we need to load parallel package?
 
-	if(use.multicore && !("multicore" %in% names(sessionInfo()$otherPkgs)))
+	if(use.multicore || !is.null(snow.cluster))
 	{
-		message("\nPackage 'multicore' is not loaded - parallel processing disabled. Please load multicore with library(multicore). (See ?bayespeak for more information.)\n")
-		use.multicore = FALSE
-	}
-
-	if(!is.null(snow.cluster) && !("snow" %in% names(sessionInfo()$otherPkgs)))
-	{
-		message("\nPackage 'snow' is not loaded - parallel processing disabled. Please load multicore with library(snow). (See ?bayespeak for more information.)\n")
-		snow.cluster <- NULL
+		require(parallel)
 	}
 	
 	if(use.multicore && !is.null(snow.cluster))
@@ -426,9 +419,9 @@ bayespeak <- function(treatment, control, chr = NULL, start, end, bin.size = 100
 
 			if(!is.null(snow.cluster))
 			{
-				output <- snow::clusterApplyLB(snow.cluster, jobs, function(x){eval(parse(text = x))})
+				output <- parallel::clusterApplyLB(snow.cluster, jobs, function(x){eval(parse(text = x))})
 			} else if(use.multicore) {
-				output <- multicore::mclapply(jobs, function(x){eval(parse(text = x))}, mc.cores = mc.cores)
+				output <- parallel::mclapply(jobs, function(x){eval(parse(text = x))}, mc.cores = mc.cores)
 			} else {
 				output <- lapply(jobs, function(x){eval(parse(text = x))})
 			}

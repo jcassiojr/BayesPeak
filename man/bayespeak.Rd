@@ -11,7 +11,7 @@ bayespeak(treatment, control, chr = NULL, start,
 	end, bin.size = 100L, iterations = 10000L,
 	repeat.offset = TRUE, into.jobs = TRUE, job.size = 6E6L,
 	job.overlap = 20L, use.multicore = FALSE,
-	mc.cores = getOption("cores"), snow.cluster,
+	mc.cores = getOption("mc.cores", 1), snow.cluster,
 	prior = c(5, 5, 10, 5, 25, 4, 0.5, 5),
 	report.p.samples = TRUE)
 }

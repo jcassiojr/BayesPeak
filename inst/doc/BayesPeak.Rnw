@@ -174,16 +174,16 @@ The output of this function is a list of four things:
 
 Due to its computational intensity, \Rpackage{BayesPeak} can be slow. However, the jobs can be run in parallel. This allows us to take advantage of multiple processors and dramatically reduce the time the algorithm takes.
 
-\Rpackage{BayesPeak} optionally supports two packages for parallelization: \Rpackage{multicore} and \Rpackage{snow}. Note that if both options are enabled, then the \Rpackage{snow} cluster will take precedence.
+\Rpackage{BayesPeak} optionally supports two parallelization schemas provided in the \Rpackage{parallel} package: \emph{multicore} (forking) and \emph{snow}. The \emph{snow} method will take precedence if both options are enabled.
 
 \subsubsection{multicore}
 
-At the time of writing, the \Rpackage{multicore} package can be downloaded from \texttt{http://www.rforge.net/multicore/} and is available for Mac or Linux.
+The \emph{multicore} method cannot be used in Windows, but provides a quick and simple parallization method for all other platforms.
 
-\begin{sloppypar}Having installed \Rpackage{multicore}, you can run the \texttt{bayespeak()} function in parallel by using the \texttt{use.multicore = TRUE} option. You can override the number of cores that multicore uses with the \texttt{mc.cores} argument.\end{sloppypar}
+To use \emph{multicore}, run the \texttt{bayespeak()} function in parallel by using the \texttt{use.multicore = TRUE} option. You can override the number of cores that multicore uses with the \texttt{mc.cores} argument.
 
 <<Help, eval=FALSE>>=
-library(multicore)
+library(parallel)
 raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed",
 	use.multicore = TRUE, mc.cores = 4)
 output <- summarize.peaks(raw.output, method = "lowerbound")
@@ -191,23 +191,18 @@ output <- summarize.peaks(raw.output, method = "lowerbound")
 
 \subsubsection{snow}
 
-With the use of functionality from the \Rpackage{snow} package, \Rpackage{BayesPeak} can be run on a cluster of machines.
-
-The \Rpackage{snow} package is available from CRAN and, therefore, can be directly installed with the command \texttt{install.packages("snow")}. 
-
-One can create a cluster and use it to parallelize the \texttt{bayespeak()} function. For example:
+With \emph{snow}, \Rpackage{BayesPeak} can be run in parallel - on one machine, or on a cluster of machines. To use this method, one must create a cluster, and then supply it to the \texttt{bayespeak()} function via the \texttt{snow.cluster} argument. For example:
 
 <<Help, eval=FALSE>>=
-library(snow)
-cl <- makeCluster(4, type="SOCK") ##adapt this line as appropriate for your cluster
-clusterEvalQ(cl, library(BayesPeak)) ##load BayesPeak on the cluster
+library(parallel)
+cl <- makeCluster(4, type="PSOCK") ##adapt this line as appropriate for your cluster
+cl <- clusterEvalQ(cl, library(BayesPeak)) ##load BayesPeak on the cluster
 raw.output <- bayespeak("H3K4me3-chr16.bed", "Input-chr16.bed",
 	snow.cluster = cl)
 output <- summarize.peaks(raw.output, method = "lowerbound")
 @
 
-NB: If \Rpackage{snow} support is active, then \texttt{bayespeak()} will not display the progress that has been made through a chromosome. It will, however, display when a chromosome is complete.
-
+NB: If a \emph{snow} cluster is in use, then \texttt{bayespeak()} will only display progress when a chromosome has been analysed - progress that has been made through a chromosome will not be displayed.
 
 %%
 
