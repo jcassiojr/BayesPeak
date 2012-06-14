@@ -3,7 +3,7 @@
 \title{BayesPeak - Bayesian analysis of ChIP-seq data}
 
 \description{
-  BayesPeak - Bayesian analysis of ChIP-seq data. This function divides the genome into jobs, and performs the BayesPeak algorithm on each using a C backend. The jobs can be performed in parallel, using the package \code{multicore}. Results are returned in R.
+  BayesPeak - Bayesian analysis of ChIP-seq data. This function divides the genome into jobs, and performs the BayesPeak algorithm on each using a C backend. The jobs can be performed in parallel, using the package \code{parallel}. Results are returned in R.
 }
 
 \usage{
@@ -69,15 +69,15 @@ bayespeak(treatment, control, chr = NULL, start,
 	}
 
 	\item{use.multicore}{
-		Logical. If \code{use.multicore = TRUE}, then the individual chunks will be processed in parallel, using the \code{multicore} package. The \code{multicore} package must be installed for this feature to be enabled. At time of writing, it can be downloaded from \url{http://www.rforge.net/multicore/index.html}.
+		Logical. If \code{use.multicore = TRUE}, then the individual chunks will be processed in parallel, using the \code{\link[parallel]{mclapply}} function.
 	}
 
 	\item{mc.cores}{
-		Numeric. The number of cores to be used for parallel processing. This argument is passed directly to the \code{\link[multicore]{mclapply}} function.
+		Numeric. The number of cores to be used for parallel processing. This argument is passed directly to the \code{\link[parallel]{mclapply}} function.
 	}
 
 	\item{snow.cluster}{
-		Cluster object. A cluster to be used for parallel processing, as per the \code{snow} package. A cluster can be created via the \code{\link[snow]{makeCluster}} function.
+		Cluster object. A cluster to be used for parallel processing, as per the \code{snow} package. A cluster can be created via the \code{\link[parallel]{makeCluster}} function.
 	}
 
 	\item{prior}{
