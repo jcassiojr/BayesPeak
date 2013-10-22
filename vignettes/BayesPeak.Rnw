@@ -1,3 +1,4 @@
+
 %
 % NOTE -- ONLY EDIT bayespeak.rnw!!!
 %
@@ -6,6 +7,10 @@
 %\VignetteKeywords{BayesPeak}
 %\VignettePackage{BayesPeak}
 \documentclass{article}
+
+<<style, eval=TRUE, echo=FALSE, results=tex>>=
+BiocStyle::latex()
+@
 
 \usepackage{amsmath}
 \usepackage[authoryear,round]{natbib}
@@ -18,22 +23,20 @@
 %\parskip=.3cm
 \oddsidemargin=.1in
 \evensidemargin=.1in
-\headheight=-.3in
+%\headheight=-.3in
 
-\newcommand{\Rfunction}[1]{{\texttt{#1}}}
-\newcommand{\Robject}[1]{{\texttt{#1}}}
-\newcommand{\Rpackage}[1]{{\textsf{#1}}}
+%\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+%\newcommand{\Robject}[1]{{\texttt{#1}}}
+%\newcommand{\Rpackage}[1]{{\textsf{#1}}}
 \newcommand{\Rmethod}[1]{{\texttt{#1}}}
 \newcommand{\Rfunarg}[1]{{\texttt{#1}}}
-\newcommand{\Rclass}[1]{{\textit{#1}}}
+%\newcommand{\Rclass}[1]{{\textit{#1}}}
 
 \SweaveOpts{keep.source=TRUE} 
 
 \newcommand{\classdef}[1]{
   {\em #1}
 }
-
-
 
 \begin{document}
 \title{\Rpackage{BayesPeak}: Bayesian Analysis of ChIP-seq data}
