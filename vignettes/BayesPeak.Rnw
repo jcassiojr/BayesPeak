@@ -9,14 +9,14 @@
 \documentclass{article}
 
 <<style, eval=TRUE, echo=FALSE, results=tex>>=
-BiocStyle::latex(bibstyle="plainnat")
+BiocStyle::latex(use.unsrturl=FALSE)
 @
 
 \usepackage{amsmath}
+\usepackage[authoryear,round]{natbib}
 \usepackage{hyperref}
 \usepackage{cite}
 \usepackage{Sweave}
-\usepackage[authoryear,round]{natbib}
 
 \textwidth=6.2in
 \textheight=8.5in
@@ -572,6 +572,7 @@ sessionInfo()
 
 Many thanks to Dr. Duncan Odom's group for permission to use the H3K4me3 data set used in our examples, and to Dr. Jason Carroll's group for permission to use the data set shown in the \texttt{raw.output} data file.
 
+\bibliographstyle{plainnat}
 \bibliography{BayesPeak}
 
 \end{document}
