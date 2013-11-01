@@ -572,7 +572,7 @@ sessionInfo()
 
 Many thanks to Dr. Duncan Odom's group for permission to use the H3K4me3 data set used in our examples, and to Dr. Jason Carroll's group for permission to use the data set shown in the \texttt{raw.output} data file.
 
-\bibliographstyle{plainnat}
+\bibliographystyle{plainnat}
 \bibliography{BayesPeak}
 
 \end{document}
