@@ -1,12 +1,14 @@
 Package: BayesPeak
-Version: 1.15.4
+Version: 1.15.5
 Date: 2009-11-04
 Title: Bayesian Analysis of ChIP-seq Data
-Author: Christiana Spyrou, Jonathan Cairns, Rory Stark, Andy Lynch, Simon Tavar\\'{e}, 
+Author: Christiana Spyrou, Jonathan Cairns, Rory Stark, Andy Lynch,
+        Simon Tavar\\'{e},
 Maintainer: Jonathan Cairns <jmc200@cam.ac.uk>
 Depends: R (>= 2.14), IRanges
 Imports: IRanges, graphics
 Suggests: BiocStyle
-Description: This package is an implementation of the BayesPeak algorithm for peak-calling in ChIP-seq data.
+Description: This package is an implementation of the BayesPeak
+        algorithm for peak-calling in ChIP-seq data.
 License: GPL (>= 2)
-biocViews: ChIPseq
+biocViews: ChIPSeq
