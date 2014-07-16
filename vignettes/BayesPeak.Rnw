@@ -39,6 +39,7 @@ BiocStyle::latex(use.unsrturl=FALSE)
 }
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 \title{\Rpackage{BayesPeak}: Bayesian Analysis of ChIP-seq data}
 
 \author{Jonathan Cairns and Christiana Spyrou}
@@ -115,22 +116,16 @@ A parallelization strategy is available to reduce the running time of this proce
 
 \subsection{Exporting output}
 
-The output can now be saved to disk with the \texttt{export()} function from the \Rpackage{rtracklayer} package. Many standard file formats are supported - for example:
-<<savetodisk, eval=FALSE>>=
-library(rtracklayer)
-export(output, "H3K4me3output.bed")
-export(output, "H3K4me3output.gff")
-@
-
-These examples, however, will only output peak regions - they will not export the posterior probability associated with each peak. To export the full output, one can coerce the output to a data frame, and export this with standard output functions provided in R. For example:
+To export the full output, one can coerce the output to a data frame, and export this with standard output functions provided in R. For example:
 
 <<savetodisk2, eval=FALSE>>=
 write.table(as.data.frame(output), file = "H3K4me3output.txt", quote = FALSE)
 write.csv(as.data.frame(output), file = "H3K4me3output.csv", quote = FALSE)
 @
 
+Alternatively, the output can be saved to disk with the \texttt{export()} function from the \Rpackage{rtracklayer} package. Please be aware that \emph{posterior probabilities may not be exported} in some examples of this, at time of writing.
 
-We now go into this workflow in more depth.
+We now go into the workflow in more depth.
 
 \section{The algorithm}
 \label{algorithm}
