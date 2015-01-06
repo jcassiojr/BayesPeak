@@ -85,7 +85,7 @@ Load the package as follows:
 library(BayesPeak)
 @
 
-The example data set used below, consisting of the files ``H3K4me3-chr16.bed" and ``Input-chr16.bed", can be downloaded from \newline\texttt{http://www.compbio.group.cam.ac.uk/Resources/BayesPeak/csbayespeak.html}. These data were generated from a histone mark ChIP-seq experiment, performed on mouse chromosome 16. (Other data sets will contain data from multiple chromosomes - there is no need to split these up.) %FIXME
+The example data set used below, consisting of the files ``H3K4me3-chr16.bed" and ``Input-chr16.bed", can be downloaded from \newline\texttt{http://www.compbio.group.cam.ac.uk/software/bayespeak}. These data were generated from a histone mark ChIP-seq experiment, performed on mouse chromosome 16. (Other data sets will contain data from multiple chromosomes - there is no need to split these up.) %FIXME
 
 The following code is a very simple example of a \Rpackage{BayesPeak} workflow, where we analyse the region 92,000,000 - 95,000,000 bp on chromosome 16. It should take a couple of minutes on a relatively modern machine.
 
