@@ -1,0 +1,43 @@
+citHeader("To cite the R package 'BayesPeak' in publications use:")
+
+
+citEntry(entry  = "article",
+         title  = "BayesPeak: Bayesian analysis of ChIP-seq data",
+         author = personList(
+                 person(given="Jonathan", family="Cairns"),
+                 person(given="Christiana", family="Spyrou"),
+                 person(given="Rory", family="Stark"),
+                 as.person("Mike L Smith"),
+                 as.person("Andy G Lynch"),
+                 person(given="Simon", family="Tavar\\'{e}")
+			),
+	    journal = "Bioinformatics",
+	    year = "2011",
+	    volume  = "27",
+	    number =  "5",
+
+		note = paste("R package version ", R.Version()$major, ".", R.Version()$minor, sep = ""),
+		textVersion = paste("Cairns J, Spyrou C, Stark R, Smith ML, Lynch AG, Tavar\\'{e} S", "BayesPeak - an R package for analysing ChIP-seq data, Bioinformatics (2011) 27 (5): 713-714. doi: 10.1093/bioinformatics/btq685")
+	)
+
+citEntry(entry  = "article",
+         title  = "BayesPeak: Bayesian analysis of ChIP-seq data",
+         author = personList(
+                 person(given="Christiana", family="Spyrou"),
+                 person(given="Rory", family="Stark"),
+                 person(given="Andy", family="Lynch"),
+                 person(given="Simon", family="Tavar\\'{e}")
+			),
+	    journal = "BMC Bioinformatics",
+	    year = "2009",
+	    volume  = "10",
+	    number =  "299",
+
+		note = paste("R package version ", R.Version()$major, ".", R.Version()$minor, sep = ""),
+		textVersion = paste("Spyrou C, Stark R, Lynch AG, Tavar\\'{e} S",	"BayesPeak: Bayesian analysis of ChIP-seq data, BMC Bioinformatics 2009, 10:299 doi:10.1186/1471-2105-10-299")
+	)
+
+citFooter("This free open-source software implements academic
+research by the authors and co-workers. If you use it,
+please support the project by citing the appropriate
+journal articles.")
